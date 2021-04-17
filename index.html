@@ -27,10 +27,10 @@
         // http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html     
         function correctNovotnyQuadratic(initialBrix, finalBrix) {
             return 1.335 * Math.pow(10.0, -5) * Math.pow(initialBrix, 2) -
-            3.239 * Math.pow(10.0, -5) * initialBrix * finalBrix +
-            2.916 * Math.pow(10.0, -5) * Math.pow(finalBrix, 2) -
-            2.421 * Math.pow(10.0, -3) * initialBrix +
-            6.219 * Math.pow(10.0, -3) * finalBrix + 1.0;
+                3.239 * Math.pow(10.0, -5) * initialBrix * finalBrix +
+                2.916 * Math.pow(10.0, -5) * Math.pow(finalBrix, 2) -
+                2.421 * Math.pow(10.0, -3) * initialBrix +
+                6.219 * Math.pow(10.0, -3) * finalBrix + 1.0;
         }
 
         // http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
@@ -40,28 +40,27 @@
 
         function correctTerrillCubic(initialBrix, finalBrix) {
             return 1.0 - 0.0044993 * initialBrix + 0.000275806 * Math.pow(initialBrix, 2) -
-            0.00000727999 * Math.pow(initialBrix, 3) + 0.0117741 * finalBrix -
-            0.00127169 * Math.pow(finalBrix, 2) + 0.0000632929 * Math.pow(finalBrix, 3);
+                0.00000727999 * Math.pow(initialBrix, 3) + 0.0117741 * finalBrix -
+                0.00127169 * Math.pow(finalBrix, 2) + 0.0000632929 * Math.pow(finalBrix, 3);
         }
 
         function correctTerrillLinear(initialBrix, finalBrix) {
             return 1.0 - 0.000856829 * initialBrix + 0.00349412 * finalBrix;
-        }        
+        }
 
         // https://www.maischemalzundmehr.de/index.php?inhaltmitte=toolsrefraktorechner
         function correctStandard(initialBrix, finalBrixWort) {
             return 1.001843 - 0.002318474 * initialBrix - 0.000007775 * Math.pow(initialBrix, 2) -
-            0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrixWort +
-            0.00003344 * Math.pow(finalBrixWort, 2) + 0.000000086 * Math.pow(finalBrixWort, 3);
-        }   
+                0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrixWort +
+                0.00003344 * Math.pow(finalBrixWort, 2) + 0.000000086 * Math.pow(finalBrixWort, 3);
+        }
 
         function correct(correctionIndex, initialBrix, finalBrix, finalBrixWort) {
-            switch (correctionIndex)
-            {
+            switch (correctionIndex) {
                 case 0:
                     return correctTerrillCubic(initialBrix, finalBrix);
                 case 1:
-                    return correctTerrillLinear(initialBrix, finalBrix);                
+                    return correctTerrillLinear(initialBrix, finalBrix);
                 case 2:
                     return correctNovotnyQuadratic(initialBrix, finalBrix);
                 case 3:
@@ -69,7 +68,7 @@
                 case 4:
                 default:
                     return correctStandard(initialBrix, finalBrixWort);
-            } 
+            }
         }
 
         // Zymurgy July/August 2019 vol. 42.6 p. 47
@@ -80,7 +79,7 @@
         // Zymurgy July/August 2019 vol. 42.6 p. 48
         function calcABVNovotny(og, fg) {
             return fg * (5118.0 * (Math.pow(og, 2) - Math.pow(fg, 2)) + 16755.0 * (fg - og)) / (8.739 * Math.pow(og, 4)
-            - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
+                - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
         }
 
         function calcAtt(ogP, sgP) {
@@ -118,16 +117,16 @@
                 $('#finalinput').val(),
                 $('#wortcorinput').val());
             var postCommaDigits = 2;
-            $('#ogoutput').val(result.ogPlato.toFixed(postCommaDigits));
-            $('#fgoutput').val(result.fgPlato.toFixed(postCommaDigits));
-            $('#reoutput').val(result.rePlato.toFixed(postCommaDigits));
-            $('#abvoutput').val(result.abv.toFixed(postCommaDigits));
-            $('#attfgoutput').val(result.attFG.toFixed(postCommaDigits));
-            $('#attreoutput').val(result.attRE.toFixed(postCommaDigits));
+            $('#ogoutput').html(result.ogPlato.toFixed(postCommaDigits) + " °Plato");
+            $('#fgoutput').html(result.fgPlato.toFixed(postCommaDigits) + " °Plato");
+            $('#reoutput').html(result.rePlato.toFixed(postCommaDigits) + " °Plato");
+            $('#abvoutput').html(result.abv.toFixed(postCommaDigits) + " % vol");
+            $('#attfgoutput').html(result.attFG.toFixed(postCommaDigits) + " %");
+            $('#attreoutput').html(result.attRE.toFixed(postCommaDigits) + " %");
         }
 
-        $(document).ready(function() {
-            $('#btncalc').click(function() {
+        $(document).ready(function () {
+            $('#btncalc').click(function () {
                 updateResult();
             });
         });
@@ -136,15 +135,15 @@
         <div data-role="header">
             <h1>Refraktometer-Rechner</h1>
         </div>
-        <div data-role="first" class="ui-content">
+        <div role="main" class="ui-content">
             <form>
                 <label for="formselect">Berechnungsmodell:</label>
                 <select name="formselect" id="formselect">
-                    <option value="0">Terrill Kubisch</option>                                     
-                    <option value="1">Terrill Linear</option>                    
-                    <option value="2">Novotny Quadratisch</option>                    
+                    <option value="0">Terrill Kubisch</option>
+                    <option value="1">Terrill Linear</option>
+                    <option value="2">Novotny Quadratisch</option>
                     <option value="3">Novotny Linear</option>
-                    <option value="4">Standard</option>                             
+                    <option value="4">Standard</option>
                 </select>
                 <label for="initialinput">Refraktometerwert Anstellwürze (°Brix):</label>
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
@@ -154,20 +153,34 @@
                 <input type="number" name="wortcorinput" id="wortcorinput" value="1.04" step="0.01" />
             </form>
             <button name="btncalc" id="btncalc">Berechnen</button>
-            <form>
-                <label for="abvoutput">Alkoholgehalt (% vol):</label>
-                <input type="number" name="abvoutput" id="abvoutput" disabled />
-                <label for="ogoutput">Stammwürze (°Plato):</label>
-                <input type="number" name="ogoutput" id="ogoutput" disabled />                                   
-                <label for="fgoutput">Scheinbarer Restextrakt (°Plato):</label>
-                <input type="number" name="fgoutput" id="fgoutput" disabled />
-                <label for="attfgoutput">Scheinbarer Vergärungsgrad (%):</label>
-                <input type="number" name="attfgoutput" id="attfgoutput" disabled />                               
-                <label for="reoutput">Tatsächlicher Restextrakt (°Plato):</label>
-                <input type="number" name="reoutput" id="reoutput" disabled />
-                <label for="attreoutput">Tatsächlicher Vergärungsgrad (%):</label>
-                <input type="number" name="attreoutput" id="attreoutput" disabled />                               
-            </form>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Alkoholgehalt:</th>
+                        <td id="abvoutput">-</td>
+                    </tr>
+                    <tr>
+                        <td>Stammwürze:</th>
+                        <td id="ogoutput">-</td>
+                    </tr>
+                    <tr>
+                        <td>Scheinbarer Restextrakt:</th>
+                        <td id="fgoutput">-</td>
+                    </tr>
+                    <tr>
+                        <td>Scheinbarer Vergärungsgrad:</th>
+                        <td id="attfgoutput">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tatsächlicher Restextrakt:</th>
+                        <td id="reoutput">-</td>
+                    </tr>
+                    <tr>
+                        <td>Tatsächlicher Vergärungsgrad:</th>
+                        <td id="attreoutput">-</td>
+                    </tr>                                    
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
