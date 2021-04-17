@@ -71,12 +71,12 @@
             }
         }
 
-        // Zymurgy July/August 2019 vol. 42.6 p. 47
+        // Zymurgy July/August 2019 p. 47
         function calcREBalling(ogPlato, aePlato) {
             return 0.1808 * ogPlato + 0.8192 * aePlato;
         }
 
-        // Zymurgy July/August 2019 vol. 42.6 p. 48
+        // Zymurgy July/August 2019 p. 48
         function calcABVNovotny(og, fg) {
             return fg * (5118.0 * (Math.pow(og, 2) - Math.pow(fg, 2)) + 16755.0 * (fg - og)) / (8.739 * Math.pow(og, 4)
                 - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
@@ -86,14 +86,25 @@
             return (ogP - sgP) * 100.0 / ogP;
         }
 
+        // Zymurgy Summer 1995 p. 59
+        function calcCaloriesPer100Mil(og, fg) {
+            return (3621.0 * fg * ((0.8114 * fg + 0.1886 *og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
+        }
+
+        function kcalToJoule(kcal) {
+            return kcal * 4185.8;
+        }
+
         class Result {
-            constructor(ogPlato, fgPlato, rePlato, abv, attFG, attRE) {
+            constructor(ogPlato, fgPlato, rePlato, abv, attFG, attRE, cal) {
                 this.ogPlato = ogPlato;
                 this.fgPlato = fgPlato;
                 this.rePlato = rePlato;
                 this.abv = abv;
                 this.attFG = attFG;
                 this.attRE = attRE;
+                this.cal = cal;
+                this.calkj = kcalToJoule(cal) / 1000.0;
             }
         }
 
@@ -107,7 +118,8 @@
             var abv = calcABVNovotny(og, fg);
             var attFG = calcAtt(initialBrix, fgPlato);
             var attRE = calcAtt(initialBrix, rePlato);
-            return new Result(initialBrix, fgPlato, rePlato, abv, attFG, attRE);
+            var cal = calcCaloriesPer100Mil(og, fg);
+            return new Result(initialBrix, fgPlato, rePlato, abv, attFG, attRE, cal);
         }
 
         function updateResult() {
@@ -123,6 +135,7 @@
             $('#abvoutput').html(result.abv.toFixed(postCommaDigits) + " % vol");
             $('#attfgoutput').html(result.attFG.toFixed(postCommaDigits) + " %");
             $('#attreoutput').html(result.attRE.toFixed(postCommaDigits) + " %");
+            $('#caloutput').html(result.calkj.toFixed(postCommaDigits) + " kJ / " + result.cal.toFixed(postCommaDigits) + " kcal");
         }
 
         $(document).ready(function () {
@@ -178,7 +191,11 @@
                     <tr>
                         <td>Tatsächlicher Vergärungsgrad:</th>
                         <td id="attreoutput">-</td>
-                    </tr>                                    
+                    </tr>
+                    <tr>
+                        <td>Nährwert je 100 ml:</th>
+                        <td id="caloutput">-</td>
+                    </tr>                                                          
                 </tbody>
             </table>
         </div>
