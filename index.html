@@ -24,7 +24,7 @@
             return 1.0 + (plato / (258.6 - ((plato / 258.2) * 227.1)));
         }
 
-        // http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html     
+        // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html     
         function correctNovotnyQuadratic(initialBrix, finalBrix) {
             return 1.335 * Math.pow(10.0, -5) * Math.pow(initialBrix, 2) -
                 3.239 * Math.pow(10.0, -5) * initialBrix * finalBrix +
@@ -33,26 +33,33 @@
                 6.219 * Math.pow(10.0, -3) * finalBrix + 1.0;
         }
 
-        // http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
+        // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
         function correctNovotnyLinear(initialBrix, finalBrix) {
             return -0.002349 * initialBrix + 0.006276 * finalBrix + 1.0;
         }
 
+        // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
         function correctTerrillCubic(initialBrix, finalBrix) {
             return 1.0 - 0.0044993 * initialBrix + 0.000275806 * Math.pow(initialBrix, 2) -
                 0.00000727999 * Math.pow(initialBrix, 3) + 0.0117741 * finalBrix -
                 0.00127169 * Math.pow(finalBrix, 2) + 0.0000632929 * Math.pow(finalBrix, 3);
         }
 
+        // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
         function correctTerrillLinear(initialBrix, finalBrix) {
             return 1.0 - 0.000856829 * initialBrix + 0.00349412 * finalBrix;
         }
 
-        // https://www.maischemalzundmehr.de/index.php?inhaltmitte=toolsrefraktorechner
-        function correctStandard(initialBrix, finalBrixWort) {
+        // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
+        function correctBonham(initialBrix, finalBrixWort) {
             return 1.001843 - 0.002318474 * initialBrix - 0.000007775 * Math.pow(initialBrix, 2) -
-                0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrixWort +
+            0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrixWort +
                 0.00003344 * Math.pow(finalBrixWort, 2) + 0.000000086 * Math.pow(finalBrixWort, 3);
+        }
+
+        // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
+        function correctGardner(initialBrix, finalBrixWort) {
+            return platoToSG(1.53 * finalBrixWort - 0.59 * initialBrix);
         }
 
         function correct(correctionIndex, initialBrix, finalBrix, finalBrixWort) {
@@ -66,17 +73,19 @@
                 case 3:
                     return correctNovotnyLinear(initialBrix, finalBrix);
                 case 4:
+                    return correctBonham(initialBrix, finalBrixWort);
+                case 5:
                 default:
-                    return correctStandard(initialBrix, finalBrixWort);
+                    return correctGardner(initialBrix, finalBrixWort);
             }
         }
 
-        // Zymurgy July/August 2019 p. 47
+        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 47
         function calcREBalling(ogPlato, aePlato) {
             return 0.1808 * ogPlato + 0.8192 * aePlato;
         }
 
-        // Zymurgy July/August 2019 p. 48
+        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 48
         function calcABVNovotny(og, fg) {
             return fg * (5118.0 * (Math.pow(og, 2) - Math.pow(fg, 2)) + 16755.0 * (fg - og)) / (8.739 * Math.pow(og, 4)
                 - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
@@ -86,7 +95,7 @@
             return (ogP - sgP) * 100.0 / ogP;
         }
 
-        // Zymurgy Summer 1995 p. 59
+        // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
         function calcCaloriesPer100ML(og, fg) {
             return (3621.0 * fg * ((0.8114 * fg + 0.1886 *og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
         }
@@ -132,7 +141,7 @@
                     result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
                     result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
                     result.cal = calcCaloriesPer100ML(og, fg);
-                    result.calkj = kcalToJoule(result.cal) / 1000.0
+                    result.calkj = kcalToJoule(result.cal) / 1000.0;
                 }
             };
             return result;
@@ -185,7 +194,8 @@
                     <option value="1">Terrill Linear</option>
                     <option value="2">Novotny Quadratisch</option>
                     <option value="3">Novotny Linear</option>
-                    <option value="4">Standard</option>
+                    <option value="4">Bonham</option>
+                    <option value="5">Gardner</option>
                 </select>
                 <label for="initialinput">Refraktometerwert Anstellwürze (°Brix):</label>
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
