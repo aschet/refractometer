@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Binford Refraktometer Rechner 3000</title>
+    <title>Binford Refraktometer-Rechner 3000</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -12,6 +12,8 @@
 
 <body>
     <script>
+        // Copyright (c) 2021 Thomas Ascher
+        // Licensed under the terms of the MIT license
         // https://www.brewersfriend.com/plato-to-sg-conversion-chart/
         function sgToPlato(sg) {
             return (-1.0 * 616.868) + (1111.14 * sg) - (630.272 * Math.pow(sg, 2)) + (135.997 * Math.pow(sg, 3));
@@ -132,7 +134,7 @@
     </script>
     <div data-role="page">
         <div data-role="header">
-            <h1>Refraktometer Rechner</h1>
+            <h1>Refraktometer-Rechner</h1>
         </div>
         <div data-role="first" class="ui-content">
             <form>
@@ -144,9 +146,9 @@
                     <option value="3">Novotny Linear</option>
                     <option value="4">Standard</option>                             
                 </select>
-                <label for="initialinput">Stammwürze (°Brix):</label>
+                <label for="initialinput">Refraktometerwert Anstellwürze (°Brix):</label>
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
-                <label for="finalinput">Extrakt Jungbier (°Brix):</label>
+                <label for="finalinput">Refraktometerwert Jungbier (°Brix):</label>
                 <input type="number" name="finalinput" id="finalinput" value="" step="0.1" />
                 <label for="wortcorinput">Würze Korrekturfaktor:</label>
                 <input type="number" name="wortcorinput" id="wortcorinput" value="1.04" step="0.01" />
@@ -155,7 +157,7 @@
             <form>
                 <label for="abvoutput">Alkoholgehalt (% vol):</label>
                 <input type="number" name="abvoutput" id="abvoutput" disabled />
-                <label for="ogoutput">Korrigierte Stammwürze (°Plato):</label>
+                <label for="ogoutput">Stammwürze (°Plato):</label>
                 <input type="number" name="ogoutput" id="ogoutput" disabled />                                   
                 <label for="fgoutput">Scheinbarer Restextrakt (°Plato):</label>
                 <input type="number" name="fgoutput" id="fgoutput" disabled />
