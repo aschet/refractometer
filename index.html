@@ -82,12 +82,12 @@
                 - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
         }
 
-        function calcAtt(ogP, sgP) {
+        function calcAttenuation(ogP, sgP) {
             return (ogP - sgP) * 100.0 / ogP;
         }
 
         // Zymurgy Summer 1995 p. 59
-        function calcCaloriesPer100Mil(og, fg) {
+        function calcCaloriesPer100ML(og, fg) {
             return (3621.0 * fg * ((0.8114 * fg + 0.1886 *og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
         }
 
@@ -96,30 +96,51 @@
         }
 
         class Result {
-            constructor(ogPlato, fgPlato, rePlato, abv, attFG, attRE, cal) {
-                this.ogPlato = ogPlato;
-                this.fgPlato = fgPlato;
-                this.rePlato = rePlato;
-                this.abv = abv;
-                this.attFG = attFG;
-                this.attRE = attRE;
-                this.cal = cal;
-                this.calkj = kcalToJoule(cal) / 1000.0;
+            constructor() {
+                this.ogPlato = NaN;
+                this.fgPlato = NaN;
+                this.rePlato = NaN;
+                this.abv = NaN;
+                this.attFG = NaN;
+                this.attRE = NaN;
+                this.cal = NaN;
+                this.calkj = NaN;
             }
         }
 
         function calc(correctionIndex, initialBrixWort, finalBrixWort, wortCor) {
-            var initialBrix = initialBrixWort / wortCor;
+            var result = new Result();
+            result.ogPlato = initialBrixWort / wortCor;
             var finalBrix = finalBrixWort / wortCor;
-            var fg = correct(correctionIndex, initialBrix, finalBrix, finalBrixWort);
-            var og = platoToSG(initialBrix);
-            var fgPlato = sgToPlato(fg);
-            var rePlato = calcREBalling(initialBrix, fgPlato);
-            var abv = calcABVNovotny(og, fg);
-            var attFG = calcAtt(initialBrix, fgPlato);
-            var attRE = calcAtt(initialBrix, rePlato);
-            var cal = calcCaloriesPer100Mil(og, fg);
-            return new Result(initialBrix, fgPlato, rePlato, abv, attFG, attRE, cal);
+            var fg = correct(correctionIndex, result.ogPlato, finalBrix, finalBrixWort);
+            var og = platoToSG(result.ogPlato);
+            result.fgPlato = sgToPlato(fg);
+            result.rePlato = calcREBalling(result.ogPlato, result.fgPlato);
+            result.abv = calcABVNovotny(og, fg);
+            result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
+            result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
+            result.cal = calcCaloriesPer100ML(og, fg);
+            result.calkj = kcalToJoule(result.cal) / 1000.0
+            return result;
+        }
+
+        function textify(value, unit) {
+            const POST_COMMA_DIGITS = 2;
+            if (isNaN(value)) {
+                return "-";
+            } else {
+                return value.toFixed(POST_COMMA_DIGITS) + " " + unit;
+            }
+        }
+
+        function updateTable(result) {
+            $('#ogoutput').html(textify(result.ogPlato, "°Plato"));
+            $('#fgoutput').html(textify(result.fgPlato, "°Plato"));
+            $('#reoutput').html(textify(result.rePlato, "°Plato"));
+            $('#abvoutput').html(textify(result.abv, "% vol"));
+            $('#attfgoutput').html(textify(result.attFG, "%"));
+            $('#attreoutput').html(textify(result.attRE, "%"));
+            $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.cal, "kcal"));
         }
 
         function updateResult() {
@@ -128,20 +149,14 @@
                 $('#initialinput').val(),
                 $('#finalinput').val(),
                 $('#wortcorinput').val());
-            var postCommaDigits = 2;
-            $('#ogoutput').html(result.ogPlato.toFixed(postCommaDigits) + " °Plato");
-            $('#fgoutput').html(result.fgPlato.toFixed(postCommaDigits) + " °Plato");
-            $('#reoutput').html(result.rePlato.toFixed(postCommaDigits) + " °Plato");
-            $('#abvoutput').html(result.abv.toFixed(postCommaDigits) + " % vol");
-            $('#attfgoutput').html(result.attFG.toFixed(postCommaDigits) + " %");
-            $('#attreoutput').html(result.attRE.toFixed(postCommaDigits) + " %");
-            $('#caloutput').html(result.calkj.toFixed(postCommaDigits) + " kJ / " + result.cal.toFixed(postCommaDigits) + " kcal");
+            updateTable(result);
         }
 
-        $(document).ready(function () {
-            $('#btncalc').click(function () {
+        $(document).ready(function() {
+            $('#btncalc').click(function() {
                 updateResult();
             });
+            updateTable(new Result());
         });
     </script>
     <div data-role="page">
@@ -170,31 +185,31 @@
                 <tbody>
                     <tr>
                         <td>Alkoholgehalt:</th>
-                        <td id="abvoutput">-</td>
+                        <td id="abvoutput"></td>
                     </tr>
                     <tr>
                         <td>Stammwürze:</th>
-                        <td id="ogoutput">-</td>
+                        <td id="ogoutput"></td>
                     </tr>
                     <tr>
                         <td>Scheinbarer Restextrakt:</th>
-                        <td id="fgoutput">-</td>
+                        <td id="fgoutput"></td>
                     </tr>
                     <tr>
                         <td>Scheinbarer Vergärungsgrad:</th>
-                        <td id="attfgoutput">-</td>
+                        <td id="attfgoutput"></td>
                     </tr>
                     <tr>
                         <td>Tatsächlicher Restextrakt:</th>
-                        <td id="reoutput">-</td>
+                        <td id="reoutput"></td>
                     </tr>
                     <tr>
                         <td>Tatsächlicher Vergärungsgrad:</th>
-                        <td id="attreoutput">-</td>
+                        <td id="attreoutput"></td>
                     </tr>
                     <tr>
                         <td>Nährwert je 100 ml:</th>
-                        <td id="caloutput">-</td>
+                        <td id="caloutput"></td>
                     </tr>                                                          
                 </tbody>
             </table>
