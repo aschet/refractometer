@@ -108,19 +108,33 @@
             }
         }
 
+        function isNumeric(str) {
+            if (typeof str != "string")
+                return false;  
+            return !isNaN(str) && !isNaN(parseFloat(str))
+        }
+
         function calc(correctionIndex, initialBrixWort, finalBrixWort, wortCor) {
+            var hasInitialBrixWort = isNumeric(initialBrixWort);
+            var hasFinalBrixWort = isNumeric(finalBrixWort);
+            var hasWortCor = isNumeric(wortCor);
+
             var result = new Result();
-            result.ogPlato = initialBrixWort / wortCor;
-            var finalBrix = finalBrixWort / wortCor;
-            var fg = correct(correctionIndex, result.ogPlato, finalBrix, finalBrixWort);
-            var og = platoToSG(result.ogPlato);
-            result.fgPlato = sgToPlato(fg);
-            result.rePlato = calcREBalling(result.ogPlato, result.fgPlato);
-            result.abv = calcABVNovotny(og, fg);
-            result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
-            result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
-            result.cal = calcCaloriesPer100ML(og, fg);
-            result.calkj = kcalToJoule(result.cal) / 1000.0
+            if (hasInitialBrixWort && hasWortCor) {
+                result.ogPlato = initialBrixWort / wortCor;
+                if (hasFinalBrixWort) {
+                    var finalBrix = finalBrixWort / wortCor;
+                    var fg = correct(correctionIndex, result.ogPlato, finalBrix, finalBrixWort);
+                    var og = platoToSG(result.ogPlato);
+                    result.fgPlato = sgToPlato(fg);
+                    result.rePlato = calcREBalling(result.ogPlato, result.fgPlato);
+                    result.abv = calcABVNovotny(og, fg);
+                    result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
+                    result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
+                    result.cal = calcCaloriesPer100ML(og, fg);
+                    result.calkj = kcalToJoule(result.cal) / 1000.0
+                }
+            };
             return result;
         }
 
