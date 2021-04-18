@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Binford Refraktometer-Rechner 3000</title>
+    <title>Refraktometer-Rechner</title>
+    <meta name="description" content="Refraktometer Berechnungen und Messwertkorrektur für Hobbybrauer">
+    <meta name="keywords" content="Refraktometer, Refraktometer-Korrektur, Bier, Brauen, Hobbybrauer">
+    <meta name="author" content="Thomas Ascher">   
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
@@ -91,8 +94,14 @@
                 - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
         }
 
-        function calcAttenuation(ogP, sgP) {
-            return (ogP - sgP) * 100.0 / ogP;
+        // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
+        function calcABWFromABV(abv, fg) {
+            return abv / (fg / 0.794);
+        }
+        
+        // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
+        function calcAttenuation(ogPlato, sgPlato) {
+            return (ogPlato - sgPlato) * 100.0 / ogPlato;
         }
 
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
@@ -110,6 +119,7 @@
                 this.fgPlato = NaN;
                 this.rePlato = NaN;
                 this.abv = NaN;
+                this.abw = NaN;
                 this.attFG = NaN;
                 this.attRE = NaN;
                 this.cal = NaN;
@@ -138,6 +148,7 @@
                     result.fgPlato = sgToPlato(fg);
                     result.rePlato = calcREBalling(result.ogPlato, result.fgPlato);
                     result.abv = calcABVNovotny(og, fg);
+                    result.abw = calcABWFromABV(result.abv, fg);
                     result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
                     result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
                     result.cal = calcCaloriesPer100ML(og, fg);
@@ -160,7 +171,7 @@
             $('#ogoutput').html(textify(result.ogPlato, "°Plato"));
             $('#fgoutput').html(textify(result.fgPlato, "°Plato"));
             $('#reoutput').html(textify(result.rePlato, "°Plato"));
-            $('#abvoutput').html(textify(result.abv, "% vol"));
+            $('#abvoutput').html(textify(result.abv, "Vol.-%") + " / " + textify(result.abw, "Masse-%"));
             $('#attfgoutput').html(textify(result.attFG, "%"));
             $('#attreoutput').html(textify(result.attRE, "%"));
             $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.cal, "kcal"));
