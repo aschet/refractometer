@@ -94,9 +94,9 @@
                 - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
         }
 
-        // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
+        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 46
         function calcABWFromABV(abv, fg) {
-            return abv / (fg / 0.794);
+            return abv * 0.791 / fg;
         }
         
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
