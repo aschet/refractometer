@@ -106,7 +106,7 @@
 
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
         function calcCaloriesPer100ML(og, fg) {
-            return (3621.0 * fg * ((0.8114 * fg + 0.1886 *og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
+            return (3621.0 * fg * ((0.8114 * fg + 0.1886 * og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
         }
 
         function kcalToJoule(kcal) {
@@ -168,9 +168,9 @@
         }
 
         function updateTable(result) {
-            $('#ogoutput').html(textify(result.ogPlato, "°Plato"));
-            $('#fgoutput').html(textify(result.fgPlato, "°Plato"));
-            $('#reoutput').html(textify(result.rePlato, "°Plato"));
+            $('#ogoutput').html(textify(result.ogPlato, "°P"));
+            $('#fgoutput').html(textify(result.fgPlato, "°P"));
+            $('#reoutput').html(textify(result.rePlato, "°P"));
             $('#abvoutput').html(textify(result.abv, "Vol.-%") + " / " + textify(result.abw, "Masse-%"));
             $('#attfgoutput').html(textify(result.attFG, "%"));
             $('#attreoutput').html(textify(result.attRE, "%"));
