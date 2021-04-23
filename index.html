@@ -28,7 +28,9 @@
         }
 
         // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html     
-        function correctNovotnyQuadratic(initialBrix, finalBrix) {
+        function correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
+            finalBrix /= wortFactor;
             return 1.335 * Math.pow(10.0, -5) * Math.pow(initialBrix, 2) -
                 3.239 * Math.pow(10.0, -5) * initialBrix * finalBrix +
                 2.916 * Math.pow(10.0, -5) * Math.pow(finalBrix, 2) -
@@ -37,55 +39,63 @@
         }
 
         // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
-        function correctNovotnyLinear(initialBrix, finalBrix) {
+        function correctNovotnyLinear(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
+            finalBrix /= wortFactor;            
             return -0.002349 * initialBrix + 0.006276 * finalBrix + 1.0;
         }
 
         // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
-        function correctTerrillCubic(initialBrix, finalBrix) {
+        function correctTerrillCubic(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
+            finalBrix /= wortFactor;            
             return 1.0 - 0.0044993 * initialBrix + 0.000275806 * Math.pow(initialBrix, 2) -
                 0.00000727999 * Math.pow(initialBrix, 3) + 0.0117741 * finalBrix -
                 0.00127169 * Math.pow(finalBrix, 2) + 0.0000632929 * Math.pow(finalBrix, 3);
         }
 
         // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
-        function correctTerrillLinear(initialBrix, finalBrix) {
+        function correctTerrillLinear(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
+            finalBrix /= wortFactor;            
             return 1.0 - 0.000856829 * initialBrix + 0.00349412 * finalBrix;
         }
 
         // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
-        function correctBonham(initialBrix, finalBrixWort) {
+        function correctBonham(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
             return 1.001843 - 0.002318474 * initialBrix - 0.000007775 * Math.pow(initialBrix, 2) -
-            0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrixWort +
-                0.00003344 * Math.pow(finalBrixWort, 2) + 0.000000086 * Math.pow(finalBrixWort, 3);
+            0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrix +
+                0.00003344 * Math.pow(finalBrix, 2) + 0.000000086 * Math.pow(finalBrix, 3);
         }
 
         // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
-        function correctGardner(initialBrix, finalBrixWort) {
-            return platoToSG(1.53 * finalBrixWort - 0.59 * initialBrix);
+        function correctGardner(initialBrix, finalBrix, wortFactor) {
+            initialBrix /= wortFactor;
+            return platoToSG(1.53 * finalBrix - 0.59 * initialBrix);
         }
 
-        function correct(correctionIndex, initialBrix, finalBrix, finalBrixWort) {
-            switch (correctionIndex) {
+        function correct(modelIndex, initialBrix, finalBrix, wortFactor) {
+            switch (modelIndex) {
                 case 0:
-                    return correctTerrillCubic(initialBrix, finalBrix);
+                    return correctTerrillCubic(initialBrix, finalBrix, wortFactor);
                 case 1:
-                    return correctTerrillLinear(initialBrix, finalBrix);
+                    return correctTerrillLinear(initialBrix, finalBrix, wortFactor);
                 case 2:
-                    return correctNovotnyQuadratic(initialBrix, finalBrix);
+                    return correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor);
                 case 3:
-                    return correctNovotnyLinear(initialBrix, finalBrix);
+                    return correctNovotnyLinear(initialBrix, finalBrix, wortFactor);
                 case 4:
-                    return correctBonham(initialBrix, finalBrixWort);
+                    return correctBonham(initialBrix, finalBrix, wortFactor);
                 case 5:
                 default:
-                    return correctGardner(initialBrix, finalBrixWort);
+                    return correctGardner(initialBrix, finalBrix, wortFactor);
             }
         }
 
         // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 47
-        function calcREBalling(ogPlato, aePlato) {
-            return 0.1808 * ogPlato + 0.8192 * aePlato;
+        function calcREBalling(oe, ae) {
+            return 0.1808 * oe + 0.8192 * ae;
         }
 
         // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 48
@@ -100,8 +110,8 @@
         }
         
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
-        function calcAttenuation(ogPlato, sgPlato) {
-            return (ogPlato - sgPlato) * 100.0 / ogPlato;
+        function calcAttenuation(oe, re) {
+            return (oe - re) * 100.0 / oe;
         }
 
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
@@ -115,9 +125,9 @@
 
         class Result {
             constructor() {
-                this.ogPlato = NaN;
-                this.fgPlato = NaN;
-                this.rePlato = NaN;
+                this.oe = NaN;
+                this.ae = NaN;
+                this.re = NaN;
                 this.abv = NaN;
                 this.abw = NaN;
                 this.attFG = NaN;
@@ -133,24 +143,36 @@
             return !isNaN(str) && !isNaN(parseFloat(str))
         }
 
-        function calc(correctionIndex, initialBrixWort, finalBrixWort, wortCor) {
-            var hasInitialBrixWort = isNumeric(initialBrixWort);
-            var hasFinalBrixWort = isNumeric(finalBrixWort);
-            var hasWortCor = isNumeric(wortCor);
+        class Input {
+            constructor() {
+                this.modelIndex = 0;
+                this.initialBrix = "";
+                this.finalBrix = "";
+                this.wortFactor = "";
+            }
 
+            hasInitialInput() {
+                return isNumeric(this.initialBrix) && isNumeric(this.wortFactor);
+            }
+
+            hasFinalInput() {
+                return isNumeric(this.finalBrix) && isNumeric(this.wortFactor);
+            }
+        }
+
+        function calc(input) {
             var result = new Result();
-            if (hasInitialBrixWort && hasWortCor) {
-                result.ogPlato = initialBrixWort / wortCor;
-                if (hasFinalBrixWort) {
-                    var finalBrix = finalBrixWort / wortCor;
-                    var fg = correct(correctionIndex, result.ogPlato, finalBrix, finalBrixWort);
-                    var og = platoToSG(result.ogPlato);
-                    result.fgPlato = sgToPlato(fg);
-                    result.rePlato = calcREBalling(result.ogPlato, result.fgPlato);
+            if (input.hasInitialInput()) {
+                result.oe = input.initialBrix / input.wortFactor;
+                if (input.hasFinalInput()) {
+                    var fg = correct(input.modelIndex, input.initialBrix, input.finalBrix, input.wortFactor);
+                    var og = platoToSG(result.oe);
+                    result.ae = sgToPlato(fg);
+                    result.re = calcREBalling(result.oe, result.ae);
                     result.abv = calcABVNovotny(og, fg);
                     result.abw = calcABWFromABV(result.abv, fg);
-                    result.attFG = calcAttenuation(result.ogPlato, result.fgPlato);
-                    result.attRE = calcAttenuation(result.ogPlato, result.rePlato);
+                    result.attFG = calcAttenuation(result.oe, result.ae);
+                    result.attRE = calcAttenuation(result.oe, result.re);
                     result.cal = calcCaloriesPer100ML(og, fg);
                     result.calkj = kcalToJoule(result.cal) / 1000.0;
                 }
@@ -168,21 +190,27 @@
         }
 
         function updateTable(result) {
-            $('#ogoutput').html(textify(result.ogPlato, "°P"));
-            $('#fgoutput').html(textify(result.fgPlato, "°P"));
-            $('#reoutput').html(textify(result.rePlato, "°P"));
+            $('#ogoutput').html(textify(result.oe, "°P"));
+            $('#fgoutput').html(textify(result.ae, "°P"));
+            $('#reoutput').html(textify(result.re, "°P"));
             $('#abvoutput').html(textify(result.abv, "vol %") + " / " + textify(result.abw, "%"));
             $('#attfgoutput').html(textify(result.attFG, "%"));
             $('#attreoutput').html(textify(result.attRE, "%"));
             $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.cal, "kcal"));
         }
 
+        function getInput() {
+            var input = new Input();
+            input.modelIndex = $('#formselect').prop('selectedIndex');
+            input.initialBrix = $('#initialinput').val();
+            input.finalBrix = $('#finalinput').val();
+            input.wortFactor = $('#wortfactorinput').val();
+            return input;
+        }
+
         function updateResult() {
-            var result = calc(
-                $('#formselect').prop('selectedIndex'),
-                $('#initialinput').val(),
-                $('#finalinput').val(),
-                $('#wortcorinput').val());
+            var input = getInput();
+            var result = calc(input);
             updateTable(result);
         }
 
@@ -192,6 +220,12 @@
             });
             updateTable(new Result());
         });
+
+        $(window).unload(function() {
+            alert('Handler for .unload() called.');
+        });
+
+
     </script>
     <div data-role="page">
         <div data-role="header">
@@ -212,8 +246,8 @@
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
                 <label for="finalinput">Refraktometerwert Jungbier (°Brix):</label>
                 <input type="number" name="finalinput" id="finalinput" value="" step="0.1" />
-                <label for="wortcorinput">Würze-Korrekturfaktor:</label>
-                <input type="number" name="wortcorinput" id="wortcorinput" value="1.04" step="0.01" />
+                <label for="wortfactorinput">Würze-Korrekturfaktor:</label>
+                <input type="number" name="wortfactorinput" id="wortfactorinput" value="1.04" step="0.01" />
             </form>
             <button name="btncalc" id="btncalc">Berechnen</button>
             <table>
