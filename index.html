@@ -130,8 +130,8 @@
                 this.re = NaN;
                 this.abv = NaN;
                 this.abw = NaN;
-                this.attFG = NaN;
-                this.attRE = NaN;
+                this.attenuationAE = NaN;
+                this.attenuationRE = NaN;
                 this.cal = NaN;
                 this.calkj = NaN;
             }
@@ -179,8 +179,8 @@
                     result.re = calcREBalling(result.oe, result.ae);
                     result.abv = calcABVNovotny(og, fg);
                     result.abw = calcABWFromABV(result.abv, fg);
-                    result.attFG = calcAttenuation(result.oe, result.ae);
-                    result.attRE = calcAttenuation(result.oe, result.re);
+                    result.attenuationAE = calcAttenuation(result.oe, result.ae);
+                    result.attenuationRE = calcAttenuation(result.oe, result.re);
                     result.cal = calcCaloriesPer100ML(og, fg);
                     result.calkj = kcalToJoule(result.cal) / 1000.0;
                 }
@@ -198,12 +198,12 @@
         }
 
         function updateTable(result) {
-            $('#ogoutput').html(textify(result.oe, "°P"));
-            $('#fgoutput').html(textify(result.ae, "°P"));
+            $('#abvoutput').html(textify(result.abv, "vol %") + " / " + textify(result.abw, "%"));            
+            $('#oeoutput').html(textify(result.oe, "°P"));
+            $('#aeoutput').html(textify(result.ae, "°P"));
+            $('#attenuationaeoutput').html(textify(result.attenuationAE, "%"));            
             $('#reoutput').html(textify(result.re, "°P"));
-            $('#abvoutput').html(textify(result.abv, "vol %") + " / " + textify(result.abw, "%"));
-            $('#attfgoutput').html(textify(result.attFG, "%"));
-            $('#attreoutput').html(textify(result.attRE, "%"));
+            $('#attenuationreoutput').html(textify(result.attenuationRE, "%"));
             $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.cal, "kcal"));
         }
 
@@ -264,15 +264,15 @@
                     </tr>
                     <tr>
                         <td>Stammwürze:</td>
-                        <td id="ogoutput"></td>
+                        <td id="oeoutput"></td>
                     </tr>
                     <tr>
                         <td>Scheinbarer Restextrakt:</td>
-                        <td id="fgoutput"></td>
+                        <td id="aeoutput"></td>
                     </tr>
                     <tr>
                         <td>Scheinbarer Vergärungsgrad:</td>
-                        <td id="attfgoutput"></td>
+                        <td id="attenuationaeoutput"></td>
                     </tr>
                     <tr>
                         <td>Tatsächlicher Restextrakt:</td>
@@ -280,7 +280,7 @@
                     </tr>
                     <tr>
                         <td>Tatsächlicher Vergärungsgrad:</td>
-                        <td id="attreoutput"></td>
+                        <td id="attenuationreoutput"></td>
                     </tr>
                     <tr>
                         <td>Nährwert je 100 ml:</td>
