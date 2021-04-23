@@ -216,8 +216,31 @@
             return input;
         }
 
-        function storeInput() {
+        function setInput(input) {
+            $('#formselect').prop('selectedIndex', input.modelIndex).change();
+            $('#initialinput').val(input.initialBrix);
+            $('#finalinput').val(input.finalBrix);
+            $('#wortfactorinput').val(input.wortFactor);
+        }
 
+        const STORAGE_NAME = "lastInput";
+
+        function storeInput() {
+            var input = getInput();
+            localStorage.setItem(STORAGE_NAME, JSON.stringify(input));
+        }
+
+        function restoreInput() {
+            try {
+                var item = localStorage.getItem(STORAGE_NAME);
+                if (!(item === null)) {
+                    var input = JSON.parse(item);
+                    setInput(input);
+                    updateResult();
+                }
+            } catch (err) {
+
+            }
         }
 
         function updateResult() {
@@ -229,8 +252,11 @@
         $(document).ready(function() {
             $('#btncalc').click(function() {
                 updateResult();
+                storeInput();
             });
+
             updateTable(new Result());
+            restoreInput();
         });
     </script>
     <div data-role="page">
