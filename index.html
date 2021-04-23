@@ -143,6 +143,10 @@
             return !isNaN(str) && !isNaN(parseFloat(str))
         }
 
+        function isValidInput(value) {
+            return isNumeric(value) && parseFloat(value) > 0.0;
+        }
+
         class Input {
             constructor() {
                 this.modelIndex = 0;
@@ -151,20 +155,24 @@
                 this.wortFactor = "";
             }
 
-            hasInitialInput() {
-                return isNumeric(this.initialBrix) && isNumeric(this.wortFactor);
+            hasValidInitialBrix() {
+                return isValidInput(this.initialBrix);
             }
 
-            hasFinalInput() {
-                return isNumeric(this.finalBrix) && isNumeric(this.wortFactor);
+            hasValidWordFactor() {
+                return isValidInput(this.wortFactor);
+            }
+
+            hasValidFinalBrix() {
+                return isValidInput(this.finalBrix);
             }
         }
 
         function calc(input) {
             var result = new Result();
-            if (input.hasInitialInput()) {
+            if (input.hasValidInitialBrix() && input.hasValidWordFactor()) {
                 result.oe = input.initialBrix / input.wortFactor;
-                if (input.hasFinalInput()) {
+                if (input.hasValidFinalBrix() && parseFloat(input.initialBrix) > parseFloat(input.finalBrix)) {
                     var fg = correct(input.modelIndex, input.initialBrix, input.finalBrix, input.wortFactor);
                     var og = platoToSG(result.oe);
                     result.ae = sgToPlato(fg);
@@ -206,6 +214,10 @@
             input.finalBrix = $('#finalinput').val();
             input.wortFactor = $('#wortfactorinput').val();
             return input;
+        }
+
+        function storeInput() {
+
         }
 
         function updateResult() {
