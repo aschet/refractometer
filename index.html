@@ -78,18 +78,18 @@
         function correct(modelIndex, initialBrix, finalBrix, wortFactor) {
             switch (modelIndex) {
                 case 0:
-                    return correctTerrillCubic(initialBrix, finalBrix, wortFactor);
-                case 1:
                     return correctTerrillLinear(initialBrix, finalBrix, wortFactor);
+                case 1:
+                    return correctTerrillCubic(initialBrix, finalBrix, wortFactor);
                 case 2:
-                    return correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor);
-                case 3:
                     return correctNovotnyLinear(initialBrix, finalBrix, wortFactor);
+                case 3:
+                    return correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor);
                 case 4:
-                    return correctBonham(initialBrix, finalBrix, wortFactor);
+                    return correctGardner(initialBrix, finalBrix, wortFactor);
                 case 5:
                 default:
-                    return correctGardner(initialBrix, finalBrix, wortFactor);
+                    return correctBonham(initialBrix, finalBrix, wortFactor);
             }
         }
 
@@ -267,12 +267,12 @@
             <form>
                 <label for="formselect">Berechnungsmodell:</label>
                 <select name="formselect" id="formselect">
-                    <option value="0">Terrill Kubisch</option>
-                    <option value="1">Terrill Linear</option>
-                    <option value="2">Novotny Quadratisch</option>
-                    <option value="3">Novotny Linear</option>
-                    <option value="4">Bonham / Stan­dard</option>
-                    <option value="5">Gardner</option>
+                    <option value="0">Terrill Linear</option>                    
+                    <option value="1">Terrill Kubisch</option>
+                    <option value="2">Novotny Linear</option>                    
+                    <option value="3">Novotny Quadratisch</option>
+                    <option value="4">Gardner</option>
+                    <option value="5">Bonham / Stan­dard</option>
                 </select>
                 <label for="initialinput">Refraktometerwert Anstellwürze (°Brix):</label>
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
