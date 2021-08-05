@@ -17,101 +17,135 @@
     <script>
         // Copyright (c) 2021 Thomas Ascher
         // Licensed under the terms of the MIT license
-        // https://www.brewersfriend.com/plato-to-sg-conversion-chart/
-        function sgToPlato(sg) {
-            return (-1.0 * 616.868) + (1111.14 * sg) - (630.272 * Math.pow(sg, 2)) + (135.997 * Math.pow(sg, 3));
+                
+        function correct_ri(ri, wcf) {
+            return ri / wcf;
         }
 
-        // https://www.brewersfriend.com/plato-to-sg-conversion-chart/
-        function platoToSG(plato) {
-            return 1.0 + (plato / (258.6 - ((plato / 258.2) * 227.1)));
+        function no_correct_ri(ri, wcf) {
+            return ri * 1.0;
         }
 
-        // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html     
-        function correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            finalBrix /= wortFactor;
-            return 1.335 * Math.pow(10.0, -5) * Math.pow(initialBrix, 2) -
-                3.239 * Math.pow(10.0, -5) * initialBrix * finalBrix +
-                2.916 * Math.pow(10.0, -5) * Math.pow(finalBrix, 2) -
-                2.421 * Math.pow(10.0, -3) * initialBrix +
-                6.219 * Math.pow(10.0, -3) * finalBrix + 1.0;
+        // https://www.brewersfriend.com/plato-to-sg-conversion-chart
+        function sg_to_plato(sg) {
+            return (-1.0 * 616.868) + (1111.14 * sg) - (630.272 * sg**2) + (135.997 * sg**3);
         }
 
-        // Novotny, Pocitame: Nova korekce refraktometru, http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
-        function correctNovotnyLinear(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            finalBrix /= wortFactor;            
-            return -0.002349 * initialBrix + 0.006276 * finalBrix + 1.0;
+        function plato_to_sg(se) {
+            return 1.0 + (se / (258.6 - ((se / 258.2) * 227.1)));
         }
 
-        // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
-        function correctTerrillCubic(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            finalBrix /= wortFactor;            
-            return 1.0 - 0.0044993 * initialBrix + 0.000275806 * Math.pow(initialBrix, 2) -
-                0.00000727999 * Math.pow(initialBrix, 3) + 0.0117741 * finalBrix -
-                0.00127169 * Math.pow(finalBrix, 2) + 0.0000632929 * Math.pow(finalBrix, 3);
+        // https://www.brewersjournal.info/science-basic-beer-alcohol-extract-determinations/
+        function calc_re(oe, ae) {
+            return (0.1948 * oe) + (0.8052 * ae);
         }
 
-        // Terrill, Refractometer FG Results, http://seanterrill.com/2011/04/07/refractometer-fg-results/
-        function correctTerrillLinear(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            finalBrix /= wortFactor;            
-            return 1.0 - 0.000856829 * initialBrix + 0.00349412 * finalBrix;
+        function calc_abw(oe, ae) {
+            re = calc_re(oe, ae);
+            return (oe - re) / (2.0665 - (1.0665 * oe / 100.0));
         }
 
-        // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
-        function correctBonham(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            return 1.001843 - 0.002318474 * initialBrix - 0.000007775 * Math.pow(initialBrix, 2) -
-            0.000000034 * Math.pow(initialBrix, 3) + 0.00574 * finalBrix +
-                0.00003344 * Math.pow(finalBrix, 2) + 0.000000086 * Math.pow(finalBrix, 3);
+        function calc_abv(abw, fg) {
+            return abw * fg / 0.7907;
         }
 
-        // Bonham, The Use of Handheld Refractometers by Homebrewers, Zymurgy January/February 2001 p. 44
-        function correctGardner(initialBrix, finalBrix, wortFactor) {
-            initialBrix /= wortFactor;
-            return platoToSG(1.53 * finalBrix - 0.59 * initialBrix);
+        function calc_abv_simple(oe, ae) {
+            return calc_abv(calc_abw(oe, ae), plato_to_sg(ae));
         }
 
-        function correct(modelIndex, initialBrix, finalBrix, wortFactor) {
-            switch (modelIndex) {
-                case 0:
-                    return correctTerrillLinear(initialBrix, finalBrix, wortFactor);
-                case 1:
-                    return correctTerrillCubic(initialBrix, finalBrix, wortFactor);
-                case 2:
-                    return correctNovotnyLinear(initialBrix, finalBrix, wortFactor);
-                case 3:
-                    return correctNovotnyQuadratic(initialBrix, finalBrix, wortFactor);
-                case 4:
-                    return correctGardner(initialBrix, finalBrix, wortFactor);
-                case 5:
-                default:
-                    return correctBonham(initialBrix, finalBrix, wortFactor);
+        function abv_common(cor_model, rii, rif, wcf) {
+            const [oe, ae] = cor_model(rii, rif, wcf);
+            return calc_abv_simple(oe, ae);
+        }
+
+        // The Use of Handheld Refractometers by Homebrewer, Zymurgy January/February 2001 p. 44
+        function cor_bonham(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            return [oe, sg_to_plato(1.001843 - 0.002318474 * oe - 0.000007775 * oe**2 -
+                0.000000034 * oe**3 + 0.00574 * rif +
+                0.00003344 * rif**2 + 0.000000086 * rif**3)];
+        }
+
+        // The Use of Handheld Refractometers by Homebrewer, Zymurgy January/February 2001 p. 44
+        function cor_gardner(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            return [oe, 1.53 * rif - 0.59 * oe];
+        }
+
+        // http://www.ithacoin.com/brewing/Derivation.htm
+        function abv_gosett(cor_model, rii, rif, wcf) {
+            k = 0.445;
+            c = 100.0 * (rii - rif) / (100.0 - 48.4 * k - 0.582 * rif);
+            abw = 48.4 * c / (100 - 0.582 * c);
+            const [oe, ae] = cor_model(rii, rif, wcf);
+            return calc_abv(abw, plato_to_sg(ae));
+        }
+
+        // http://www.diversity.beer/2017/01/pocitame-nova-korekce-refraktometru.html
+        function cor_novotny_linear(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            rifc = correct_ri(rif, wcf);
+            return [oe, sg_to_plato(-0.002349 * oe + 0.006276 * rifc + 1.0)];
+        }
+        
+        function cor_novotny_quadratic(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            rifc = correct_ri(rif, wcf);
+            return [oe, sg_to_plato(1.335 * 10.0**-5 * oe**2 -
+                3.239 * 10.0**-5 * oe * rifc +
+                2.916 * 10.0**-5 * rifc**2 -
+                2.421 * 10.0**-3 * oe +
+                6.219 * 10.0**-3 * rifc + 1.0)];
+        }
+
+        // http://seanterrill.com/2011/04/07/refractometer-fg-results/
+        function cor_terrill_linear(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            rifc = correct_ri(rif, wcf);
+            return [oe, sg_to_plato(1.0 - 0.000856829 * oe + 0.00349412 * rifc)];
+        }
+
+        function cor_terrill_cubic(rii, rif, wcf) {
+            oe = correct_ri(rii, wcf);
+            rifc = correct_ri(rif, wcf);
+            return [oe, sg_to_plato(1.0 - 0.0044993 * oe + 0.000275806 * oe**2 -
+                0.00000727999 * oe**3 + 0.0117741 * rifc -
+                0.00127169 * rifc**2 + 0.0000632929 * rifc**3)];
+        }
+
+        class RefracModel {
+            constructor(cor_model, abv_model, rii_correction) {
+                this.rii_correction = rii_correction
+                this.cor_model = cor_model;
+                this.abv_model = abv_model;
+            }
+
+            calc_oe(rii, wcf) {
+                return this.rii_correction(rii, wcf);
+            }
+
+            calc(rii, rif, wcf) {
+                const [oe, ae] = this.cor_model(rii, rif, wcf);
+                let re = calc_re(oe, ae);
+                let abv = this.abv_model(this.cor_model, rii, rif, wcf);
+                let abw = calc_abw(oe, ae);
+                return [oe, ae, re, abv, abw];
             }
         }
 
-        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 47
-        function calcREBalling(oe, ae) {
-            return 0.1808 * oe + 0.8192 * ae;
-        }
+        refrac_models = [
+            new RefracModel(cor_terrill_linear, abv_common, correct_ri),
+            new RefracModel(cor_terrill_cubic, abv_common, correct_ri),
+            new RefracModel(cor_novotny_linear, abv_common, correct_ri),
+            new RefracModel(cor_novotny_quadratic, abv_common, correct_ri),
+            new RefracModel(cor_bonham, abv_common, correct_ri),
+            new RefracModel(cor_gardner, abv_common, correct_ri),
+            new RefracModel(cor_bonham, abv_gosett, no_correct_ri)
+        ];
 
-        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 48
-        function calcABVNovotny(og, fg) {
-            return fg * (5118.0 * (Math.pow(og, 2) - Math.pow(fg, 2)) + 16755.0 * (fg - og)) / (8.739 * Math.pow(og, 4)
-                - 57.22 * Math.pow(og, 3) + 89.09 * Math.pow(og, 2) + 14.95 + og - 105.99)
-        }
-
-        // Novotny, Revisiting ABV Calculations, Zymurgy July/August 2019 p. 46
-        function calcABWFromABV(abv, fg) {
-            return abv * 0.791 / fg;
-        }
-        
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
-        function calcAttenuation(oe, re) {
-            return (oe - re) * 100.0 / oe;
+        function calcAttenuation(oe, se) {
+            return (oe - se) * 100.0 / oe;
         }
 
         // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
@@ -159,7 +193,7 @@
                 return isValidInput(this.initialBrix);
             }
 
-            hasValidWordFactor() {
+            hasValidWortFactor() {
                 return isValidInput(this.wortFactor);
             }
 
@@ -170,18 +204,18 @@
 
         function calc(input) {
             var result = new Result();
-            if (input.hasValidInitialBrix() && input.hasValidWordFactor()) {
-                result.oe = input.initialBrix / input.wortFactor;
+            if (input.hasValidInitialBrix() && input.hasValidWortFactor()) {
+                model = refrac_models[input.modelIndex];
+                result.oe = model.calc_oe(input.initialBrix, input.wortFactor);
                 if (input.hasValidFinalBrix() && parseFloat(input.initialBrix) > parseFloat(input.finalBrix)) {
-                    var fg = correct(input.modelIndex, input.initialBrix, input.finalBrix, input.wortFactor);
-                    var og = platoToSG(result.oe);
-                    result.ae = sgToPlato(fg);
-                    result.re = calcREBalling(result.oe, result.ae);
-                    result.abv = calcABVNovotny(og, fg);
-                    result.abw = calcABWFromABV(result.abv, fg);
+                    const [oe, ae, re, abv, abw] = model.calc(input.initialBrix, input.finalBrix, input.wortFactor);
+                    result.ae = ae;
+                    result.re = re;
+                    result.abv = abv;
+                    result.abw = abw;
                     result.attenuationAE = calcAttenuation(result.oe, result.ae);
                     result.attenuationRE = calcAttenuation(result.oe, result.re);
-                    result.cal = calcCaloriesPer100ML(og, fg);
+                    result.cal = calcCaloriesPer100ML(plato_to_sg(oe), plato_to_sg(ae));
                     result.calkj = kcalToJoule(result.cal) / 1000.0;
                 }
             };
@@ -273,10 +307,11 @@
                     <option value="3">Novotny Quadratisch</option>
                     <option value="4">Gardner</option>
                     <option value="5">Bonham / Stan­dard</option>
+                    <option value="6">Gossett</option>                    
                 </select>
-                <label for="initialinput">Refraktometerwert Anstellwürze (°Brix):</label>
+                <label for="initialinput">Refraktometerwert Stammwürze (°Bx):</label>
                 <input type="number" name="initialinput" id="initialinput" value="" step="0.1" />
-                <label for="finalinput">Refraktometerwert Jungbier (°Brix):</label>
+                <label for="finalinput">Refraktometerwert Jungbier (°Bx):</label>
                 <input type="number" name="finalinput" id="finalinput" value="" step="0.1" />
                 <label for="wortfactorinput">Würze-Korrekturfaktor:</label>
                 <input type="number" name="wortfactorinput" id="wortfactorinput" value="1.04" step="0.01" />
@@ -301,11 +336,11 @@
                         <td id="attenuationaeoutput"></td>
                     </tr>
                     <tr>
-                        <td>Tatsächlicher Restextrakt:</td>
+                        <td>Wirklicher Restextrakt:</td>
                         <td id="reoutput"></td>
                     </tr>
                     <tr>
-                        <td>Tatsächlicher Vergärungsgrad:</td>
+                        <td>Wirklicher Vergärungsgrad:</td>
                         <td id="attenuationreoutput"></td>
                     </tr>
                     <tr>
