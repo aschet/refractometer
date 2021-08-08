@@ -114,11 +114,11 @@
                 0.00127169 * rifc**2 + 0.0000632929 * rifc**3)];
         }
 
-	// Obtained by ML approach from Terrill and Novotny equations
+	// Obtained by line fit into data generated from Terrill and Novotny equations
 	function cor_sklearn(rii, rif, wcf) {
 	    riic = correct_ri(rii, wcf);
 	    rifc = correct_ri(rif, wcf);
-	    fg = 0.992196 + -0.001626 * riic + 0.005999 * rifc;  
+	    fg = 0.991845 + -0.001637 * riic + 0.006053 * rifc;  
 	    return [riic, sg_to_plato(fg)];
 	}
 
