@@ -25,7 +25,7 @@ function noCorrectBx(bx, wcf) {
     return bx * 1.0;
 }
 
-// Alcohol content estimation and Plato/SG conversion implemented according to
+// Alcohol content estimation and Plato/SG conversion implemented according to:
 // G. Spedding. "Alcohol and Its Measurement". In: Brewing Materials and Processes. Elsevier,
 // 2016, S. 123-149. DOI: 10.1016/b978-0-12-799954-8.00007-1.
 
@@ -173,13 +173,18 @@ function calcAttenuation(oe, se) {
     return (oe - se) * 100.0 / oe;
 }
 
-// Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 59
-function calcCaloriesPer100ML(og, fg) {
-    return (3621.0 * fg * ((0.8114 * fg + 0.1886 * og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
+// Nutrition facts implemented according to:
+// Brewers Journal. Basic Beer Alcohol. 2017.
+// URL: https://www.brewersjournal.info/science-basic-beer-alcohol-extract-determinations
+
+function calcKcalPer100ML(abw, re, fg) {
+    kcal = 6.9 * abw + 4 * (re - 0.22);
+    return kcal * fg;
 }
 
-function kcalToJoule(kcal) {
-    return kcal * 4185.8;
+function calcKJPer100ML(abw, re, fg) {
+    kj = 29.0 * abw + 17.0 * (re - 0.22);
+    return kj * fg;
 }
 
 class Result {
@@ -191,7 +196,7 @@ class Result {
         this.abw = NaN;
         this.attenuationAE = NaN;
         this.attenuationRE = NaN;
-        this.cal = NaN;
+        this.kcal = NaN;
         this.calkj = NaN;
     }
 }
@@ -238,10 +243,10 @@ function calc(input) {
             result.re = re;
             result.abv = abv;
             result.abw = abw;
-            result.attenuationAE = calcAttenuation(result.oe, result.ae);
-            result.attenuationRE = calcAttenuation(result.oe, result.re);
-            result.cal = calcCaloriesPer100ML(pToSG(oe), fg);
-            result.calkj = kcalToJoule(result.cal) / 1000.0;
+            result.attenuationAE = calcAttenuation(oe, ae);
+            result.attenuationRE = calcAttenuation(oe, re);
+            result.kcal = calcKcalPer100ML(abw, re, fg);
+            result.calkj = calcKJPer100ML(abw, re, fg);
         }
     };
     return result;
@@ -263,7 +268,7 @@ function updateTable(result) {
     $('#attenuationaeoutput').html(textify(result.attenuationAE, "%"));            
     $('#reoutput').html(textify(result.re, "°P"));
     $('#attenuationreoutput').html(textify(result.attenuationRE, "%"));
-    $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.cal, "kcal"));
+    $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.kcal, "kcal"));
 }
 
 function getInput() {
