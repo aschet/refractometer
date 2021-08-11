@@ -37,7 +37,7 @@ function pToSG(p) {
     return p / (258.6 - (p / 258.2 * 227.1)) + 1.0;
 }
 
-function calc_re(oe, ae) {
+function calcRE(oe, ae) {
     return 0.1948 * oe + 0.8052 * ae;
 }
 
@@ -145,7 +145,7 @@ class RefracModel {
 
     calc(bxi, bxf, wcf) {
         const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
-        let re = calc_re(oe, ae);
+        let re = calcRE(oe, ae);
         let abw = 0.0;
         if (this.abwModel == null) {
             abw = calcABW(oe, re);
