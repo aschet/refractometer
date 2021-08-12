@@ -21,10 +21,6 @@ function correctBx(bx, wcf) {
     return bx / wcf;
 }
 
-function noCorrectBx(bx, wcf) {
-    return bx * 1.0;
-}
-
 // Alcohol content estimation and Plato/SG conversion implemented according to:
 // G. Spedding. "Alcohol and Its Measurement". In: Brewing Materials and Processes. Elsevier,
 // 2016, S. 123-149. DOI: 10.1016/b978-0-12-799954-8.00007-1.
@@ -84,6 +80,18 @@ function abwGosett(bxi, bxf, wcf) {
     k = 0.445;
     c = 100.0 * (bxi - bxf) / (100.0 - 48.4 * k - 0.582 * bxf);
     return 48.4 * c / (100 - 0.582 * c);
+}
+
+function corFromABW(abw, bxi, wcf) {
+    oe = correctBx(bxi, wcf);
+    ae = oe - (abw * (2.0665 - 1.0665 * oe / 100.0)) / 0.8052;
+    return [oe, ae, pToSG(ae)];
+}
+
+// Gossett does use the Bonham correlation to determine the fg for abv calculation.
+// To have a matching ae for the calculation is is derived from the abw equation instead.  
+function corGossett(bxi, bxf, wcf) {
+    return corFromABW(abwGosett(bxi, bxf, wcf), bxi, wcf);
 }
 
 // Novotný correlation functions implemented according to:
@@ -149,14 +157,13 @@ function calcKJPer100ML(abw, re, fg) {
 }
 
 class RefracModel {
-    constructor(corModel, bxCorrection = correctBx, abwModel = null) {
-        this.corModel = corModel;
-        this.bxCorrection = bxCorrection;        
+    constructor(corModel, abwModel = null) {
+        this.corModel = corModel;  
         this.abwModel = abwModel;
     }
 
     calcOE(bxi, wcf) {
-        return this.bxCorrection(bxi, wcf);
+        return correctBx(bxi, wcf);
     }
 
     calc(bxi, bxf, wcf) {
@@ -187,7 +194,7 @@ refracModels = [
     new RefracModel(corNovotnyQuadratic),
     new RefracModel(corBonham),
     new RefracModel(corGardner),
-    new RefracModel(corBonham, noCorrectBx, abwGosett),
+    new RefracModel(corGossett, abwGosett),
     new RefracModel(corAscher)            
 ];
 
