@@ -162,10 +162,6 @@ class RefracModel {
         this.abwModel = abwModel;
     }
 
-    calcOE(bxi, wcf) {
-        return correctBx(bxi, wcf);
-    }
-
     calc(bxi, bxf, wcf) {
         const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
         let result = new Result();
@@ -248,7 +244,7 @@ function calc(input) {
     var result = new Result();
     if (input.hasBXI() && input.hasWCF()) {
         model = refracModels[input.modelIndex];
-        result.oe = model.calcOE(input.bxi, input.wcf);
+        result.oe = correctBx(input.bxi, input.wcf);
         if (input.hasBXF() && parseFloat(input.bxi) > parseFloat(input.bxf)) {
             result = model.calc(input.bxi, input.bxf, input.wcf);
         }
