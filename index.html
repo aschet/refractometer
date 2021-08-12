@@ -132,42 +132,6 @@ function corAscher(bxi, bxf, wcf) {
     return [bxic, sgToP(fg), fg];
 }
 
-class RefracModel {
-    constructor(corModel, bxCorrection = correctBx, abwModel = null) {
-        this.corModel = corModel;
-        this.bxCorrection = bxCorrection;        
-        this.abwModel = abwModel;
-    }
-
-    calcOE(bxi, wcf) {
-        return this.bxCorrection(bxi, wcf);
-    }
-
-    calc(bxi, bxf, wcf) {
-        const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
-        let re = calcRE(oe, ae);
-        let abw = 0.0;
-        if (this.abwModel == null) {
-            abw = calcABW(oe, re);
-        } else {
-            abw = this.abwModel(bxi, bxf, wcf);
-        }
-        let abv = calcABV(abw, fg);
-        return [oe, ae, fg, re, abw, abv];
-    }
-}
-
-refracModels = [
-    new RefracModel(corTerrillLinear),
-    new RefracModel(corTerrillCubic),
-    new RefracModel(corNovotnyLinear),
-    new RefracModel(corNovotnyQuadratic),
-    new RefracModel(corBonham),
-    new RefracModel(corGardner),
-    new RefracModel(corBonham, noCorrectBx, abwGosett),
-    new RefracModel(corAscher)            
-];
-
 // Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
 function calcAttenuation(oe, se) {
     return (oe - se) * 100.0 / oe;
@@ -186,6 +150,49 @@ function calcKJPer100ML(abw, re, fg) {
     kj = 29.0 * abw + 17.0 * (re - 0.22);
     return kj * fg;
 }
+
+class RefracModel {
+    constructor(corModel, bxCorrection = correctBx, abwModel = null) {
+        this.corModel = corModel;
+        this.bxCorrection = bxCorrection;        
+        this.abwModel = abwModel;
+    }
+
+    calcOE(bxi, wcf) {
+        return this.bxCorrection(bxi, wcf);
+    }
+
+    calc(bxi, bxf, wcf) {
+        const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
+        let result = new Result();
+        result.oe = oe;
+        result.ae = ae;
+        result.fg = fg;
+        result.re = calcRE(oe, ae);
+        if (this.abwModel == null) {
+            result.abw = calcABW(oe, result.re);
+        } else {
+            result.abw = this.abwModel(bxi, bxf, wcf);
+        }
+        result.abv = calcABV(result.abw, fg);
+        result.attenuationAE = calcAttenuation(oe, ae);
+        result.attenuationRE = calcAttenuation(oe, result.re);
+        result.kcal = calcKcalPer100ML(result.abw, result.re, fg);
+        result.kj = calcKJPer100ML(result.abw, result.re, fg);
+        return result;
+    }
+}
+
+refracModels = [
+    new RefracModel(corTerrillLinear),
+    new RefracModel(corTerrillCubic),
+    new RefracModel(corNovotnyLinear),
+    new RefracModel(corNovotnyQuadratic),
+    new RefracModel(corBonham),
+    new RefracModel(corGardner),
+    new RefracModel(corBonham, noCorrectBx, abwGosett),
+    new RefracModel(corAscher)            
+];
 
 class Result {
     constructor() {
@@ -239,16 +246,7 @@ function calc(input) {
         model = refracModels[input.modelIndex];
         result.oe = model.calcOE(input.bxi, input.wcf);
         if (input.hasBXF() && parseFloat(input.bxi) > parseFloat(input.bxf)) {
-            const [oe, ae, fg, re, abw, abv] = model.calc(input.bxi, input.bxf, input.wcf);
-            result.ae = ae;
-            result.fg = fg;
-            result.re = re;
-            result.abv = abv;
-            result.abw = abw;
-            result.attenuationAE = calcAttenuation(oe, ae);
-            result.attenuationRE = calcAttenuation(oe, re);
-            result.kcal = calcKcalPer100ML(abw, re, fg);
-            result.kj = calcKJPer100ML(abw, re, fg);
+            result = model.calc(input.bxi, input.bxf, input.wcf);
         }
     };
     return result;
