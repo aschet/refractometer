@@ -89,7 +89,7 @@ function corFromABW(abw, bxi, wcf) {
 }
 
 // Gossett does use the Bonham correlation to determine the fg for abv calculation.
-// To have a matching ae for the calculation is is derived from the abw equation instead.  
+// To have a matching ae for the calculation is derived from the abw equation instead.  
 function corGossett(bxi, bxf, wcf) {
     return corFromABW(abwGosett(bxi, bxf, wcf), bxi, wcf);
 }
