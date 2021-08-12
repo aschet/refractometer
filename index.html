@@ -191,13 +191,14 @@ class Result {
     constructor() {
         this.oe = NaN;
         this.ae = NaN;
+        this.fg = NaN;
         this.re = NaN;
         this.abv = NaN;
         this.abw = NaN;
         this.attenuationAE = NaN;
         this.attenuationRE = NaN;
         this.kcal = NaN;
-        this.calkj = NaN;
+        this.kj = NaN;
     }
 }
 
@@ -240,35 +241,49 @@ function calc(input) {
         if (input.hasBXF() && parseFloat(input.bxi) > parseFloat(input.bxf)) {
             const [oe, ae, fg, re, abw, abv] = model.calc(input.bxi, input.bxf, input.wcf);
             result.ae = ae;
+            result.fg = fg;
             result.re = re;
             result.abv = abv;
             result.abw = abw;
             result.attenuationAE = calcAttenuation(oe, ae);
             result.attenuationRE = calcAttenuation(oe, re);
             result.kcal = calcKcalPer100ML(abw, re, fg);
-            result.calkj = calcKJPer100ML(abw, re, fg);
+            result.kj = calcKJPer100ML(abw, re, fg);
         }
     };
     return result;
 }
 
-function textify(value, unit) {
-    const POST_COMMA_DIGITS = 2;
+function textify(value, unit, digits = 2) {
     if (isNaN(value)) {
         return "-";
     } else {
-        return value.toFixed(POST_COMMA_DIGITS) + " " + unit;
+        return value.toFixed(digits) + " " + unit;
     }
 }
 
+function concat(text1, text2) {
+    return text1 + " / " + text2;
+}
+
+function textify2(value1, unit1, value2, unit2) {
+    return concat(textify(value1, unit1), textify(value2, unit2));
+}
+
+function textifyExtract(value1, value2 = NaN) {
+    if (isNaN(value2))
+        value2 = pToSG(value1);
+    return concat(textify(value1, "°P"), textify(value2, "SG", 3));
+}
+
 function updateTable(result) {
-    $('#abvoutput').html(textify(result.abv, "vol %") + " / " + textify(result.abw, "%"));            
-    $('#oeoutput').html(textify(result.oe, "°P"));
-    $('#aeoutput').html(textify(result.ae, "°P"));
+    $('#abvoutput').html(textify2(result.abv, "vol %", result.abw, "%"));            
+    $('#oeoutput').html(textifyExtract(result.oe));
+    $('#aeoutput').html(textifyExtract(result.ae, result.fg));
     $('#attenuationaeoutput').html(textify(result.attenuationAE, "%"));            
-    $('#reoutput').html(textify(result.re, "°P"));
+    $('#reoutput').html(textifyExtract(result.re));
     $('#attenuationreoutput').html(textify(result.attenuationRE, "%"));
-    $('#caloutput').html(textify(result.calkj, "kJ") + " / " + textify(result.kcal, "kcal"));
+    $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
 }
 
 function getInput() {
