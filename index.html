@@ -49,6 +49,10 @@ function calcABV(abw, fg) {
     return abw * fg / 0.7907;
 }
 
+function calcDF(oe, se) {
+    return (oe - se) * 100.0 / oe;
+}
+
 // Bonham (Standard) correlation function implemented according to:
 // Louis K. Bonham. "The Use of Handheld Refractometers by Homebrewers".
 // In: Zymurgy 24.1 (2001), S. 43-46.
@@ -132,23 +136,16 @@ function corAscher(bxi, bxf, wcf) {
     return [bxic, sgToP(fg), fg];
 }
 
-// Hall, Brew by the Numbers, Zymurgy Summer 1995 p. 57
-function calcAttenuation(oe, se) {
-    return (oe - se) * 100.0 / oe;
-}
-
 // Nutritional calculations implemented according to:
 // Brewers Journal. Basic Beer Alcohol. 2017.
 // URL: https://www.brewersjournal.info/science-basic-beer-alcohol-extract-determinations
 
 function calcKcalPer100ML(abw, re, fg) {
-    kcal = 6.9 * abw + 4 * (re - 0.22);
-    return kcal * fg;
+    return (6.9 * abw + 4.0 * (re - 0.22)) * fg;
 }
 
 function calcKJPer100ML(abw, re, fg) {
-    kj = 29.0 * abw + 17.0 * (re - 0.22);
-    return kj * fg;
+    return (29.0 * abw + 17.0 * (re - 0.22)) * fg;
 }
 
 class RefracModel {
@@ -175,8 +172,8 @@ class RefracModel {
             result.abw = this.abwModel(bxi, bxf, wcf);
         }
         result.abv = calcABV(result.abw, fg);
-        result.attenuationAE = calcAttenuation(oe, ae);
-        result.attenuationRE = calcAttenuation(oe, result.re);
+        result.adf = calcDF(oe, ae);
+        result.rdf = calcDF(oe, result.re);
         result.kcal = calcKcalPer100ML(result.abw, result.re, fg);
         result.kj = calcKJPer100ML(result.abw, result.re, fg);
         return result;
@@ -202,8 +199,8 @@ class Result {
         this.re = NaN;
         this.abv = NaN;
         this.abw = NaN;
-        this.attenuationAE = NaN;
-        this.attenuationRE = NaN;
+        this.adf = NaN;
+        this.rdf = NaN;
         this.kcal = NaN;
         this.kj = NaN;
     }
@@ -278,9 +275,9 @@ function updateTable(result) {
     $('#abvoutput').html(textify2(result.abv, "vol %", result.abw, "%"));            
     $('#oeoutput').html(textifyExtract(result.oe));
     $('#aeoutput').html(textifyExtract(result.ae, result.fg));
-    $('#attenuationaeoutput').html(textify(result.attenuationAE, "%"));            
+    $('#adfoutput').html(textify(result.adf, "%"));            
     $('#reoutput').html(textifyExtract(result.re));
-    $('#attenuationreoutput').html(textify(result.attenuationRE, "%"));
+    $('#rdfoutput').html(textify(result.rdf, "%"));
     $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
 }
 
@@ -375,7 +372,7 @@ $(document).ready(function() {
                 </tr>
                 <tr>
                     <td>Scheinbarer Vergärungsgrad:</td>
-                    <td id="attenuationaeoutput"></td>
+                    <td id="adfoutput"></td>
                 </tr>
                 <tr>
                     <td>Wirklicher Restextrakt:</td>
@@ -383,7 +380,7 @@ $(document).ready(function() {
                 </tr>
                 <tr>
                     <td>Wirklicher Vergärungsgrad:</td>
-                    <td id="attenuationreoutput"></td>
+                    <td id="rdfoutput"></td>
                 </tr>
                 <tr>
                     <td>Nährwert je 100 ml:</td>
