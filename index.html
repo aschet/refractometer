@@ -45,8 +45,16 @@ function calcABV(abw, fg) {
     return abw * fg / 0.7907;
 }
 
-function calcDF(oe, se) {
-    return (oe - se) * 100.0 / oe;
+// Degree of fermentation calculation implemented according to:
+// Alex Speers. Brewing Calculations. 2015.
+// URL: https://chme.nmsu.edu/files/2017/03/FeatAug15.pdf
+
+function calcADF(oe, ae) {
+    return (oe - ae) * 100.0 / oe;
+}
+
+function calcRDF(oe, re) {
+    return ((oe - re) * 100.0 / oe) * (1 / (1 - 0.005161 * re));
 }
 
 // Bonham (Standard) correlation function implemented according to:
@@ -175,8 +183,8 @@ class RefracModel {
             result.abw = this.abwModel(bxi, bxf, wcf);
         }
         result.abv = calcABV(result.abw, fg);
-        result.adf = calcDF(oe, ae);
-        result.rdf = calcDF(oe, result.re);
+        result.adf = calcADF(oe, ae);
+        result.rdf = calcRDF(oe, result.re);
         result.kcal = calcKcalPer100ML(result.abw, result.re, fg);
         result.kj = calcKJPer100ML(result.abw, result.re, fg);
         return result;
