@@ -144,14 +144,6 @@ function corTerrillCubic(bxi, bxf, wcf) {
     return [oe, sgToP(fg), fg];
 }
 
-// Obtained by fit into data generated from Terrill and Novotný equations
-function corAscher(bxi, bxf, wcf) {
-    bxic = correctBx(bxi, wcf);
-    bxfc = correctBx(bxf, wcf);
-    fg = 0.991845 + -0.001637 * bxic + 0.006053 * bxfc;
-    return [bxic, sgToP(fg), fg];
-}
-
 // Nutritional calculations implemented according to:
 // Brewers Journal. Basic Beer Alcohol. 2017.
 // URL: https://www.brewersjournal.info/science-basic-beer-alcohol-extract-determinations
@@ -198,8 +190,7 @@ refracModels = [
     new RefracModel(corNovotnyQuadratic),
     new RefracModel(corBonham),
     new RefracModel(corGardner),
-    new RefracModel(corGossett, abwGosett),
-    new RefracModel(corAscher)            
+    new RefracModel(corGossett, abwGosett),         
 ];
 
 class Result {
@@ -357,7 +348,6 @@ $(document).ready(function() {
                 <option value="4">Bonham (Stan­dard)</option>
                 <option value="5">Gardner</option>
                 <option value="6">Gossett</option>
-                <option value="7">Ascher</option>
             </select>
             <label for="bxiinput">Refraktometerwert Stammwürze (°Bx):</label>
             <input type="number" name="bxiinput" id="bxiinput" value="" step="0.1" />
