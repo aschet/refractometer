@@ -144,18 +144,6 @@ function corTerrillCubic(bxi, bxf, wcf) {
     return [oe, sgToP(fg), fg];
 }
 
-// Nutritional calculations implemented according to:
-// Brewers Journal. Basic Beer Alcohol. 2017.
-// URL: https://www.brewersjournal.info/science-basic-beer-alcohol-extract-determinations
-
-function calcKcalPer100ML(abw, re, fg) {
-    return (6.9 * abw + 4.0 * (re - 0.22)) * fg;
-}
-
-function calcKJPer100ML(abw, re, fg) {
-    return (29.0 * abw + 17.0 * (re - 0.22)) * fg;
-}
-
 class RefracModel {
     constructor(corModel, abwModel = null) {
         this.corModel = corModel;  
@@ -177,8 +165,6 @@ class RefracModel {
         result.abv = calcABV(result.abw, fg);
         result.adf = calcADF(oe, ae);
         result.rdf = calcRDF(oe, result.re);
-        result.kcal = calcKcalPer100ML(result.abw, result.re, fg);
-        result.kj = calcKJPer100ML(result.abw, result.re, fg);
         return result;
     }
 }
@@ -203,8 +189,6 @@ class Result {
         this.abw = NaN;
         this.adf = NaN;
         this.rdf = NaN;
-        this.kcal = NaN;
-        this.kj = NaN;
     }
 }
 
@@ -280,7 +264,6 @@ function updateTable(result) {
     $('#adfoutput').html(textify(result.adf, "%"));            
     $('#reoutput').html(textifyExtract(result.re));
     $('#rdfoutput').html(textify(result.rdf, "%"));
-    $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
 }
 
 function getInput() {
@@ -382,11 +365,7 @@ $(document).ready(function() {
                 <tr>
                     <td>Wirklicher Vergärungsgrad:</td>
                     <td id="rdfoutput"></td>
-                </tr>
-                <tr>
-                    <td>Nährwert je 100 ml:</td>
-                    <td id="caloutput"></td>
-                </tr>                                                          
+                </tr>                                                     
             </tbody>
         </table>
     </div>
