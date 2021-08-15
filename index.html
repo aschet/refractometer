@@ -170,13 +170,13 @@ class RefracModel {
 }
 
 refracModels = [
+    new RefracModel(corNovotnyLinear),
+    new RefracModel(corNovotnyQuadratic),    
     new RefracModel(corTerrillLinear),
     new RefracModel(corTerrillCubic),
-    new RefracModel(corNovotnyLinear),
-    new RefracModel(corNovotnyQuadratic),
     new RefracModel(corBonham),
     new RefracModel(corGardner),
-    new RefracModel(corGossett, abwGosett),         
+    new RefracModel(corGossett, abwGosett)       
 ];
 
 class Result {
@@ -324,10 +324,10 @@ $(document).ready(function() {
         <form>
             <label for="formselect">Berechnungsmodell:</label>
             <select name="formselect" id="formselect">
-                <option value="0">Terrill Linear</option>
-                <option value="1">Terrill Kubisch</option>
-                <option value="2">Novotný Linear</option>
-                <option value="3">Novotný Quadratisch</option>
+                <option value="0">Novotný Linear</option>
+                <option value="1">Novotný Quadratisch</option>                
+                <option value="2">Terrill Linear</option>
+                <option value="3">Terrill Kubisch</option>
                 <option value="4">Bonham (Stan­dard)</option>
                 <option value="5">Gardner</option>
                 <option value="6">Gossett</option>
