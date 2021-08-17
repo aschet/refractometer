@@ -144,6 +144,18 @@ function corTerrillCubic(bxi, bxf, wcf) {
     return [oe, sgToP(fg), fg];
 }
 
+// Nutrient content calculation implemented according to:
+// Michael L. Hall. Brew by the Numbers.
+// In: Zymurgy Summer 1995, S. 54-61.
+
+function calcKcalPer100ML(og, fg) {
+    return (3621.0 * fg * ((0.8114 * fg + 0.1886 * og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
+}
+
+function kcalToKJ(kcal) {
+    return kcal * 4.1858;
+}
+
 class RefracModel {
     constructor(corModel, abwModel = null) {
         this.corModel = corModel;  
@@ -165,6 +177,8 @@ class RefracModel {
         result.abv = calcABV(result.abw, fg);
         result.adf = calcADF(oe, ae);
         result.rdf = calcRDF(oe, result.re);
+        result.kcal = calcKcalPer100ML(pToSG(oe), fg);
+        result.kj = kcalToKJ(result.kcal);
         return result;
     }
 }
@@ -189,6 +203,8 @@ class Result {
         this.abw = NaN;
         this.adf = NaN;
         this.rdf = NaN;
+        this.kcal = NaN;
+        this.kj = NaN;
     }
 }
 
@@ -264,6 +280,7 @@ function updateTable(result) {
     $('#adfoutput').html(textify(result.adf, "%"));            
     $('#reoutput').html(textifyExtract(result.re));
     $('#rdfoutput').html(textify(result.rdf, "%"));
+    $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
 }
 
 function getInput() {
@@ -365,7 +382,11 @@ $(document).ready(function() {
                 <tr>
                     <td>Wirklicher Vergärungsgrad:</td>
                     <td id="rdfoutput"></td>
-                </tr>                                                     
+                </tr>
+                <tr>
+                    <td>Nährwert je 100 ml:</td>
+                    <td id="caloutput"></td>
+                </tr>                                                                  
             </tbody>
         </table>
     </div>
