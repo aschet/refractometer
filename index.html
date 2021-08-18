@@ -157,23 +157,45 @@ function kcalToKJ(kcal) {
     return kcal * 4.1858;
 }
 
-calibration = [
-    {
-        x : 0,
-        y : 0
-    },
-    {
-        x : 6,
-        y : 7
-    },
-    {
-        x : 14,
-        y : 15
-    }   
+calibrationData = [
 ]; 
 
-calibrationModel = PolynomialRegression.read(calibration, 2);
-calibrationModelTerms = calibrationModel.getTerms();
+class Calibration {
+    constructor(data) {
+        let dataWithZero = [...data];
+        dataWithZero.push({ x: 0.0, y: 0.0 });
+        if (dataWithZero.length > 1) {
+            let degree = dataWithZero.length - 1;
+            if (degree > 3)
+                degree = 3;
+            this.model = PolynomialRegression.read(dataWithZero, degree);
+            this.terms = this.model.getTerms();
+        } else {
+            this.model = null;
+            this.terms = null;
+        }
+    }
+
+    getType() {
+        if (this.model == null) {
+            return "1-Punkt"
+        } else if (this.model.degree == 1) {
+            return "2-Punkt";
+        } else {
+            return "N-Punkt";
+        }
+    }
+
+    transform(value) {
+        let newValue = value * 1.0;
+        if (this.model != null) {
+            newValue = this.model.predictY(this.terms, newValue);
+        }
+        return newValue;
+    }
+}
+
+calibration = new Calibration(calibrationData);
 
 class RefracModel {
     constructor(corModel, abwModel = null) {
@@ -181,9 +203,9 @@ class RefracModel {
         this.abwModel = abwModel;
     }
 
-    calc(bxi, bxf, wcf) {
-        bxi = calibrationModel.predictY(calibrationModelTerms, bxi * 1.0);
-        bxf = calibrationModel.predictY(calibrationModelTerms, bxf * 1.0);
+    calc(bxi_, bxf_, wcf) {
+        let bxi = calibration.transform(bxi_);
+        let bxf = calibration.transform(bxf_);
         const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
         let result = new Result();
         result.oe = oe;
@@ -264,7 +286,7 @@ function calc(input) {
     var result = new Result();
     if (input.hasBXI() && input.hasWCF()) {
         model = refracModels[input.modelIndex];
-        result.oe = correctBx(input.bxi, input.wcf);
+        result.oe = correctBx(calibration.transform(input.bxi), input.wcf);
         if (input.hasBXF() && parseFloat(input.bxi) > parseFloat(input.bxf)) {
             result = model.calc(input.bxi, input.bxf, input.wcf);
         }
@@ -302,6 +324,7 @@ function updateTable(result) {
     $('#reoutput').html(textifyExtract(result.re));
     $('#rdfoutput').html(textify(result.rdf, "%"));
     $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
+    $('#caliboutput').html(calibration.getType());
 }
 
 function getInput() {
@@ -320,16 +343,17 @@ function setInput(input) {
     $('#wcfinput').val(input.wcf);
 }
 
-const STORAGE_NAME = "lastInput";
+const STORAGE_NAME_INPUT = "lastInput";
+const STORAGE_NAME_CALIB = "calibration";
 
 function storeInput() {
     var input = getInput();
-    localStorage.setItem(STORAGE_NAME, JSON.stringify(input));
+    localStorage.setItem(STORAGE_NAME_INPUT, JSON.stringify(input));
 }
 
 function restoreInput() {
     try {
-        var item = localStorage.getItem(STORAGE_NAME);
+        var item = localStorage.getItem(STORAGE_NAME_INPUT);
         if (!(item === null)) {
             var input = JSON.parse(item);
             setInput(input);
@@ -408,7 +432,11 @@ $(document).ready(function() {
                 <tr>
                     <td>Nährwert je 100 ml:</td>
                     <td id="caloutput"></td>
-                </tr>                                                                  
+                </tr>
+                <tr>
+                    <td>Kalibrierung:</td>
+                    <td id="caliboutput"></td>
+                </tr>                                                                               
             </tbody>
         </table>
     </div>
