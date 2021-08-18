@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css">
     <script src="jquery-2.2.4.min.js"></script>
     <script src="jquery.mobile-1.4.5.min.js"></script>
+    <script src="PolynomialRegression.js"></script>
 </head>
 <body>
 <script>
@@ -156,6 +157,24 @@ function kcalToKJ(kcal) {
     return kcal * 4.1858;
 }
 
+calibration = [
+    {
+        x : 0,
+        y : 0
+    },
+    {
+        x : 6,
+        y : 7
+    },
+    {
+        x : 14,
+        y : 15
+    }   
+]; 
+
+calibrationModel = PolynomialRegression.read(calibration, 2);
+calibrationModelTerms = calibrationModel.getTerms();
+
 class RefracModel {
     constructor(corModel, abwModel = null) {
         this.corModel = corModel;  
@@ -163,6 +182,8 @@ class RefracModel {
     }
 
     calc(bxi, bxf, wcf) {
+        bxi = calibrationModel.predictY(calibrationModelTerms, bxi * 1.0);
+        bxf = calibrationModel.predictY(calibrationModelTerms, bxf * 1.0);
         const [oe, ae, fg] = this.corModel(bxi, bxf, wcf);
         let result = new Result();
         result.oe = oe;
