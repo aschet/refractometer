@@ -333,9 +333,10 @@ $(document).ready(function() {
     restoreInput();
 });
 </script>
-<div data-role="page">
+<div data-role="page" id="calculation">
     <div data-role="header">
         <h1>Refraktometer-Rechner</h1>
+        <a href="#calibration" data-role="button" data-icon="gear" class="ui-btn-right">Kalibrierung</a>
     </div>
     <div role="main" class="ui-content">
         <form>
@@ -389,6 +390,19 @@ $(document).ready(function() {
                 </tr>                                                                  
             </tbody>
         </table>
+    </div>
+</div>
+<div data-role="page" id="calibration">
+    <div data-role="header">
+        <a href="#calculation" data-role="button" data-icon="back">Zurück</a>        
+        <h1>Refraktometer-Rechner: Kalibrierung</h1>
+        <div class="ui-btn-right">
+            <a href="#calculation" data-role="button" data-icon="plus">Hinzufügen</a>        
+            <a href="#calculation" data-role="button" data-icon="check">Speichern</a>
+        </div>
+    </div>
+    <div role="main" class="ui-content">
+
     </div>
 </div>
 </body>
