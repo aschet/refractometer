@@ -158,7 +158,10 @@ function kcalToKJ(kcal) {
 }
 
 calibrationData = [
+{ x: 1.0, y: 1.05 }
 ]; 
+
+selectedMeasurement = -1;
 
 class Calibration {
     constructor(data) {
@@ -187,7 +190,7 @@ class Calibration {
     }
 
     transform(value) {
-        let newValue = value * 1.0;
+        let newValue = toValue(value);
         if (this.model != null) {
             newValue = this.model.predictY(this.terms, newValue);
         }
@@ -273,12 +276,24 @@ class Input {
         return isValidInput(this.bxi);
     }
 
+    getBXI() {
+        return parseFloat(this.bxi);
+    }
+
     hasBXF() {
         return isValidInput(this.bxf);
     }
 
+    getBXF() {
+        return parseFloat(this.bxf);
+    }
+
     hasWCF() {
         return isValidInput(this.wcf);
+    }
+
+    getWCF() {
+        return parseFloat(this.wcf);
     }
 }
 
@@ -286,9 +301,9 @@ function calc(input) {
     var result = new Result();
     if (input.hasBXI() && input.hasWCF()) {
         model = refracModels[input.modelIndex];
-        result.oe = correctBx(calibration.transform(input.bxi), input.wcf);
-        if (input.hasBXF() && parseFloat(input.bxi) > parseFloat(input.bxf)) {
-            result = model.calc(input.bxi, input.bxf, input.wcf);
+        result.oe = correctBx(calibration.transform(input.getBXI()), input.getWCF());
+        if (input.hasBXF() && input.getBXI() > input.getBXF()) {
+            result = model.calc(input.getBXI(), input.getBXF(), input.getWCF());
         }
     };
     return result;
@@ -363,25 +378,85 @@ function restoreInput() {
     }
 }
 
+function storeCalibration() {
+
+}
+
+function restoreCalibration() {
+
+}
+
 function updateResult() {
     var input = getInput();
     var result = calc(input);
     updateTable(result);
 }
 
-$(document).ready(function() {
+function initList() {
+    clearListView("#lvcalibration");
+	addItemsToList("#lvcalibration-tasks", calibrationData, function(i, entity) {
+		return '<li id="' + i + '"><a href="#pdetails">' + "herman" + '</a></li>';
+	});
+}
+
+function clearListView(listviewId) {
+	$(listviewId).empty();
+	refreshListView(listviewId);
+}
+
+function refreshListView(listviewId) {
+	$(listviewId).listview("refresh");
+}
+
+function addItemsToList(listviewId, items, itemRenderer) {
+	$.each(items, function(i, item) {
+        itemCode = itemRenderer(i, item);
+        itemCode = '<li>hello</li>'
+		$(listviewId).append(itemCode);
+	});
+	refreshListView(listviewId);
+}
+
+function findItemInList(listviewId, itemId) {
+	return $(listviewId).find(itemId);
+}
+
+function updateListItem(listviewId, itemId, item, itemUpdater) {
+	itemUpdater(findItemInList(listviewId, itemId), item);
+	refreshListView(listviewId);
+}
+
+function removeListItem(listviewId, itemId) {
+	var item = findItemInList(listviewId, itemId);
+	item.remove();
+	refreshListView(listviewId);
+}
+
+$(document).on("pageinit", "#pcalculation", function(event) {
     $('#btncalc').click(function() {
         updateResult();
         storeInput();
     });
     updateTable(new Result());
+    restoreCalibration();
     restoreInput();
 });
+
+$(document).on("pageinit", "#pcalibration", function(event) {
+    initList();
+});
+
+$(document).on("pageinit", "#pdetails", function(event) {
+    $('#btnsave').click(function() {
+        storeCalibration();
+    }); 
+});
+
 </script>
-<div data-role="page" id="calculation">
+<div data-role="page" id="pcalculation">
     <div data-role="header">
         <h1>Refraktometer-Rechner</h1>
-        <a href="#calibration" data-role="button" data-icon="gear" class="ui-btn-right">Kalibrierung</a>
+        <a href="#pcalibration" data-role="button" data-icon="gear" class="ui-btn-right"  data-iconpos="notext">Kalibrierung</a>
     </div>
     <div role="main" class="ui-content">
         <form>
@@ -441,17 +516,32 @@ $(document).ready(function() {
         </table>
     </div>
 </div>
-<div data-role="page" id="calibration">
+<div data-role="page" id="pcalibration">
     <div data-role="header">
-        <a href="#calculation" data-role="button" data-icon="back">Zurück</a>        
-        <h1>Refraktometer-Rechner: Kalibrierung</h1>
-        <div class="ui-btn-right">
-            <a href="#calculation" data-role="button" data-icon="plus">Hinzufügen</a>        
-            <a href="#calculation" data-role="button" data-icon="check">Speichern</a>
-        </div>
+        <a href="#pcalculation" data-role="button" data-icon="back" data-iconpos="notext">Zurück</a>        
+        <h1>Kalibrierung</h1>
+        <a href="#pdetails" data-role="button" data-icon="plus" data-iconpos="notext">Hinzufügen</a>
     </div>
     <div role="main" class="ui-content">
-
+        <ul data-role="listview" id="lvcalibration">
+        </ul>
+        <!--<button name="btnexport" id="btnexport">Exportieren</button>
+        <button name="btnimport" id="btnimport">Importieren</button>    -->    
+    </div>
+</div>
+<div data-role="page" id="pdetails">
+    <div data-role="header">
+        <a href="#pcalibration" data-role="button" data-icon="back" data-iconpos="notext">Zurück</a>        
+        <h1>Messpunkt</h1>
+        <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" data-iconpos="notext">Speichern</a>
+    </div>
+    <div role="main" class="ui-content">
+        <form>
+            <label for="targetinput">Sollwert (°Bx):</label>
+            <input type="number" name="targetinput" id="targetinput" value="" step="0.1" />
+            <label for="actualinput">Istwert (°Bx):</label>
+            <input type="number" name="actualinput" id="actualinput" value="" step="0.1" />
+        </form>
     </div>
 </div>
 </body>
