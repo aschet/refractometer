@@ -158,15 +158,22 @@ function kcalToKJ(kcal) {
 }
 
 calibrationData = [
-{ x: 1.0, y: 1.05 }
 ]; 
 
 selectedMeasurement = -1;
 
+function initCalibration() {
+    calibration = new Calibration(calibrationData);
+}
+
+function createTuple(target, actual) {
+    return { x: actual, y: target };
+}
+
 class Calibration {
     constructor(data) {
         let dataWithZero = [...data];
-        dataWithZero.push({ x: 0.0, y: 0.0 });
+        dataWithZero.push(createTuple(0.0, 0.0));
         if (dataWithZero.length > 1) {
             let degree = dataWithZero.length - 1;
             if (degree > 3)
@@ -190,7 +197,7 @@ class Calibration {
     }
 
     transform(value) {
-        let newValue = toValue(value);
+        let newValue = value;
         if (this.model != null) {
             newValue = this.model.predictY(this.terms, newValue);
         }
@@ -198,7 +205,7 @@ class Calibration {
     }
 }
 
-calibration = new Calibration(calibrationData);
+initCalibration();
 
 class RefracModel {
     constructor(corModel, abwModel = null) {
@@ -230,10 +237,10 @@ class RefracModel {
 }
 
 refracModels = [
-    new RefracModel(corNovotnyLinear),
-    new RefracModel(corNovotnyQuadratic),    
     new RefracModel(corTerrillLinear),
     new RefracModel(corTerrillCubic),
+    new RefracModel(corNovotnyLinear),
+    new RefracModel(corNovotnyQuadratic),    
     new RefracModel(corBonham),
     new RefracModel(corGardner),
     new RefracModel(corGossett, abwGosett)       
@@ -255,7 +262,7 @@ class Result {
 }
 
 function isNumeric(str) {
-    if (typeof str != "string")
+    if (typeof str != 'string')
         return false;  
     return !isNaN(str) && !isNaN(parseFloat(str))
 }
@@ -267,9 +274,9 @@ function isValidInput(value) {
 class Input {
     constructor() {
         this.modelIndex = 0;
-        this.bxi = "";
-        this.bxf = "";
-        this.wcf = "";
+        this.bxi = '';
+        this.bxf = '';
+        this.wcf = '';
     }
 
     hasBXI() {
@@ -358,8 +365,8 @@ function setInput(input) {
     $('#wcfinput').val(input.wcf);
 }
 
-const STORAGE_NAME_INPUT = "lastInput";
-const STORAGE_NAME_CALIB = "calibration";
+const STORAGE_NAME_INPUT = 'lastInput';
+const STORAGE_NAME_CALIB = 'calibration';
 
 function storeInput() {
     var input = getInput();
@@ -379,11 +386,19 @@ function restoreInput() {
 }
 
 function storeCalibration() {
-
+    localStorage.setItem(STORAGE_NAME_CALIB, JSON.stringify(calibrationData));
 }
 
 function restoreCalibration() {
-
+    try {
+        var item = localStorage.getItem(STORAGE_NAME_CALIB);
+        if (!(item === null)) {
+            calibrationData = JSON.parse(item);
+        }
+    } catch (err) {
+        calibrationData = []
+    }
+    initCalibration();
 }
 
 function updateResult() {
@@ -393,46 +408,54 @@ function updateResult() {
 }
 
 function initList() {
-    clearListView("#lvcalibration");
-	addItemsToList("#lvcalibration-tasks", calibrationData, function(i, entity) {
-		return '<li id="' + i + '"><a href="#pdetails">' + "herman" + '</a></li>';
-	});
+    clearListView('#lvcalibration');
+    addItemsToList('#lvcalibration', calibrationData, function(i, entity) {
+    	text = 'Sollwert: ' + textify(entity.y, '°Bx') + ', Istwert: ' + textify(entity.x, '°Bx');
+        return '<li id="' + i + '"><a href="#pdetails">' + text + '</a></li>';
+    });
 }
 
 function clearListView(listviewId) {
-	$(listviewId).empty();
-	refreshListView(listviewId);
+    $(listviewId).empty();
+    refreshListView(listviewId);
 }
 
 function refreshListView(listviewId) {
-	$(listviewId).listview("refresh");
+    $(listviewId).listview('refresh');
 }
 
 function addItemsToList(listviewId, items, itemRenderer) {
-	$.each(items, function(i, item) {
-        itemCode = itemRenderer(i, item);
-        itemCode = '<li>hello</li>'
-		$(listviewId).append(itemCode);
-	});
-	refreshListView(listviewId);
+    $.each(items, function(i, item) {
+    	itemCode = itemRenderer(i, item);
+    	$(listviewId).append(itemCode);
+    });
+    refreshListView(listviewId);
 }
 
 function findItemInList(listviewId, itemId) {
-	return $(listviewId).find(itemId);
+    return $(listviewId).find(itemId);
 }
 
 function updateListItem(listviewId, itemId, item, itemUpdater) {
-	itemUpdater(findItemInList(listviewId, itemId), item);
-	refreshListView(listviewId);
+    itemUpdater(findItemInList(listviewId, itemId), item);
+    refreshListView(listviewId);
 }
 
 function removeListItem(listviewId, itemId) {
-	var item = findItemInList(listviewId, itemId);
-	item.remove();
-	refreshListView(listviewId);
+    var item = findItemInList(listviewId, itemId);
+    item.remove();
+    refreshListView(listviewId);
 }
 
-$(document).on("pageinit", "#pcalculation", function(event) {
+function showButton(buttonId, shouldShow) {
+    var button = $(buttonId);
+    if (shouldShow)
+        button.show();
+    else
+        button.hide();
+}
+
+$(document).on('pageinit', '#pcalculation', function(event) {
     $('#btncalc').click(function() {
         updateResult();
         storeInput();
@@ -442,13 +465,36 @@ $(document).on("pageinit", "#pcalculation", function(event) {
     restoreInput();
 });
 
-$(document).on("pageinit", "#pcalibration", function(event) {
+$(document).on('pageinit', '#pcalibration', function(event) {
     initList();
+    $('#lvcalibration').delegate('li', 'click', function() {
+		selectedMeasurement = $(this).attr('id');
+        entry = calibrationData[selectedMeasurement];
+        $('#targetinput').val(entry.y)
+        $('#actualinput').val(entry.x)
+	});
+	$('#btnadd').click(function() {
+        selectedMeasurement = -1;
+        $('#targetinput').val('');
+        $('#actualinput').val('');
+	});
 });
 
-$(document).on("pageinit", "#pdetails", function(event) {
+$(document).on('pageinit', '#pdetails', function(event) {
     $('#btnsave').click(function() {
+        target = parseFloat($('#targetinput').val())
+        actual = parseFloat($('#actualinput').val())
+        entry = createTuple(target, actual);
+
+        if (selectedMeasurement >= 0)
+            calibrationData[selectedMeasurement] = entry
+        else
+            calibrationData.push(entry);
+        selectedMeasurement = -1;
         storeCalibration();
+        initCalibration();
+        initList();
+        updateResult();
     }); 
 });
 
@@ -462,10 +508,10 @@ $(document).on("pageinit", "#pdetails", function(event) {
         <form>
             <label for="formselect">Korrelationsmodell:</label>
             <select name="formselect" id="formselect">
-                <option value="0">Novotný Linear</option>
-                <option value="1">Novotný Quadratisch</option>                
-                <option value="2">Terrill Linear</option>
-                <option value="3">Terrill Kubisch</option>
+                <option value="0">Terrill Linear</option>
+                <option value="1">Terrill Kubisch</option>
+                <option value="2">Novotný Linear</option>
+                <option value="3">Novotný Quadratisch</option>                
                 <option value="4">Bonham (Stan­dard)</option>
                 <option value="5">Gardner</option>
                 <option value="6">Gossett</option>
@@ -520,7 +566,7 @@ $(document).on("pageinit", "#pdetails", function(event) {
     <div data-role="header">
         <a href="#pcalculation" data-role="button" data-icon="back" data-iconpos="notext">Zurück</a>        
         <h1>Kalibrierung</h1>
-        <a href="#pdetails" data-role="button" data-icon="plus" data-iconpos="notext">Hinzufügen</a>
+        <a href="#pdetails" data-role="button" data-icon="plus" name="btnadd" id="btnadd" data-iconpos="notext" >Hinzufügen</a>
     </div>
     <div role="main" class="ui-content">
         <ul data-role="listview" id="lvcalibration">
