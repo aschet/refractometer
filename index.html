@@ -578,10 +578,6 @@ $(document).on('pageinit', '#pdetails', function(event) {
     <div data-role="header">
         <a href="#pcalibration" data-role="button" data-icon="back">Zurück</a>        
         <h1>Messpunkt</h1>
-        <div class="ui-btn-right">
-            <a href="#pcalibration" data-role="button" data-icon="delete" name="btndelete" id="btndelete">Löschen</a>
-            <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave">Speichern</a>
-        </div>
     </div>
     <div role="main" class="ui-content">
         <form>
@@ -591,6 +587,10 @@ $(document).on('pageinit', '#pdetails', function(event) {
             <input type="number" name="actualinput" id="actualinput" value="" step="0.1" />
         </form>
     </div>
+    <div data-role="footer">
+        <a href="#pcalibration" data-role="button" data-icon="delete" name="btndelete" id="btndelete" class="ui-btn-left">Löschen</a>
+        <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" class="ui-btn-right">Speichern</a>
+    </div>	
 </div>
 </body>
 </html>
