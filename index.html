@@ -371,7 +371,7 @@ function setInput(input) {
 }
 
 const STORAGE_NAME_INPUT = 'lastInput';
-const STORAGE_NAME_CALIB = 'calibrationx';
+const STORAGE_NAME_CALIB = 'calibrationData';
 
 function storeInput() {
     var input = getInput();
@@ -415,7 +415,7 @@ function updateResult() {
 function initList() {
     clearListView('#lvcalibration');
     addItemsToList('#lvcalibration', calibrationData, function(i, entity) {
-    	text = 'Sollwert: ' + textify(entity.y, '°Bx') + ', Istwert: ' + textify(entity.x, '°Bx');
+    	text = concat('Sollwert: ' + textify(entity.y, '°Bx'), 'Istwert: ' + textify(entity.x, '°Bx'));
         return '<li id="' + i + '"><a href="#pdetails">' + text + '</a></li>';
     });
 }
@@ -434,21 +434,6 @@ function addItemsToList(listviewId, items, itemRenderer) {
     	itemCode = itemRenderer(i, item);
     	$(listviewId).append(itemCode);
     });
-    refreshListView(listviewId);
-}
-
-function findItemInList(listviewId, itemId) {
-    return $(listviewId).find(itemId);
-}
-
-function updateListItem(listviewId, itemId, item, itemUpdater) {
-    itemUpdater(findItemInList(listviewId, itemId), item);
-    refreshListView(listviewId);
-}
-
-function removeListItem(listviewId, itemId) {
-    var item = findItemInList(listviewId, itemId);
-    item.remove();
     refreshListView(listviewId);
 }
 
@@ -497,13 +482,15 @@ function updateAfterCalibrationDataChange() {
 
 $(document).on('pageinit', '#pdetails', function(event) {
     $('#btnsave').click(function() {
-        target = parseFloat($('#targetinput').val())
-        actual = parseFloat($('#actualinput').val())
-        entry = createTuple(target, actual);
-        if (selectedMeasurement >= 0)
-            calibrationData[selectedMeasurement] = entry
-        else
-            calibrationData.push(entry);
+        if (isValidInput($('#targetinput').val()) && isValidInput($('#actualinput').val())) {
+            target = parseFloat($('#targetinput').val())
+            actual = parseFloat($('#actualinput').val())
+            entry = createTuple(target, actual);
+            if (selectedMeasurement >= 0)
+                calibrationData[selectedMeasurement] = entry
+            else
+                calibrationData.push(entry);
+        }
         updateAfterCalibrationDataChange();
     });
     $('#btndelete').click(function() {
@@ -594,8 +581,8 @@ $(document).on('pageinit', '#pdetails', function(event) {
         <a href="#pcalibration" data-role="button" data-icon="back">Zurück</a>        
         <h1>Messpunkt</h1>
         <div class="ui-btn-right">
-            <a href="#pcalibration" data-role="button" data-icon="delete" name="btnsave" id="btndelete" >Löschen</a>
-            <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" >Speichern</a>
+            <a href="#pcalibration" data-role="button" data-icon="delete" name="btndelete" id="btndelete">Löschen</a>
+            <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave">Speichern</a>
         </div>
     </div>
     <div role="main" class="ui-content">
