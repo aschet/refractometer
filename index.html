@@ -80,6 +80,11 @@ function corGardner(bxi, bxf, wcf) {
     return [oe, ae, pToSG(ae)];
 }
 
+function abwGardner(bxi, bxf, wcf) {
+    const [oe, ae, fg] = corGardner(bxi, bxf, wcf);
+    return 1.09 * bxf - 1.13 * ae;
+}
+
 // Gossett correlation function implemented according to:
 // James M. Gossett. Derivation and Explanation of the Brix-Based Calculator For Estimating
 // ABV in Fermenting and Finished Beers. 2012.
@@ -242,7 +247,7 @@ refracModels = [
     new RefracModel(corNovotnyLinear),
     new RefracModel(corNovotnyQuadratic),    
     new RefracModel(corBonham),
-    new RefracModel(corGardner),
+    new RefracModel(corGardner /*, abwGardner*/),
     new RefracModel(corGossett, abwGosett)       
 ];
 
@@ -366,7 +371,7 @@ function setInput(input) {
 }
 
 const STORAGE_NAME_INPUT = 'lastInput';
-const STORAGE_NAME_CALIB = 'calibration';
+const STORAGE_NAME_CALIB = 'calibrationx';
 
 function storeInput() {
     var input = getInput();
@@ -470,39 +475,48 @@ $(document).on('pageinit', '#pcalibration', function(event) {
     $('#lvcalibration').delegate('li', 'click', function() {
 		selectedMeasurement = $(this).attr('id');
         entry = calibrationData[selectedMeasurement];
-        $('#targetinput').val(entry.y)
-        $('#actualinput').val(entry.x)
+        $('#targetinput').val(entry.y);
+        $('#actualinput').val(entry.x);
+        showButton('#btndelete', true);
 	});
 	$('#btnadd').click(function() {
         selectedMeasurement = -1;
         $('#targetinput').val('');
         $('#actualinput').val('');
+        showButton('#btndelete', false);
 	});
 });
+
+function updateAfterCalibrationDataChange() {
+    selectedMeasurement = -1;
+    storeCalibration();
+    initCalibration();
+    initList();
+    updateResult();
+}
 
 $(document).on('pageinit', '#pdetails', function(event) {
     $('#btnsave').click(function() {
         target = parseFloat($('#targetinput').val())
         actual = parseFloat($('#actualinput').val())
         entry = createTuple(target, actual);
-
         if (selectedMeasurement >= 0)
             calibrationData[selectedMeasurement] = entry
         else
             calibrationData.push(entry);
-        selectedMeasurement = -1;
-        storeCalibration();
-        initCalibration();
-        initList();
-        updateResult();
-    }); 
+        updateAfterCalibrationDataChange();
+    });
+    $('#btndelete').click(function() {
+        calibrationData.splice(selectedMeasurement, 1);
+        updateAfterCalibrationDataChange();
+    });
 });
 
 </script>
 <div data-role="page" id="pcalculation">
     <div data-role="header">
         <h1>Refraktometer-Rechner</h1>
-        <a href="#pcalibration" data-role="button" data-icon="gear" class="ui-btn-right"  data-iconpos="notext">Kalibrierung</a>
+        <a href="#pcalibration" data-role="button" data-icon="gear" class="ui-btn-right">Kalibrierung</a>
     </div>
     <div role="main" class="ui-content">
         <form>
@@ -564,9 +578,9 @@ $(document).on('pageinit', '#pdetails', function(event) {
 </div>
 <div data-role="page" id="pcalibration">
     <div data-role="header">
-        <a href="#pcalculation" data-role="button" data-icon="back" data-iconpos="notext">Zurück</a>        
+        <a href="#pcalculation" data-role="button" data-icon="back">Zurück</a>        
         <h1>Kalibrierung</h1>
-        <a href="#pdetails" data-role="button" data-icon="plus" name="btnadd" id="btnadd" data-iconpos="notext" >Hinzufügen</a>
+        <a href="#pdetails" data-role="button" data-icon="plus" name="btnadd" id="btnadd">Hinzufügen</a>
     </div>
     <div role="main" class="ui-content">
         <ul data-role="listview" id="lvcalibration">
@@ -577,9 +591,12 @@ $(document).on('pageinit', '#pdetails', function(event) {
 </div>
 <div data-role="page" id="pdetails">
     <div data-role="header">
-        <a href="#pcalibration" data-role="button" data-icon="back" data-iconpos="notext">Zurück</a>        
+        <a href="#pcalibration" data-role="button" data-icon="back">Zurück</a>        
         <h1>Messpunkt</h1>
-        <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" data-iconpos="notext">Speichern</a>
+        <div class="ui-btn-right">
+            <a href="#pcalibration" data-role="button" data-icon="delete" name="btnsave" id="btndelete" >Löschen</a>
+            <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" >Speichern</a>
+        </div>
     </div>
     <div role="main" class="ui-content">
         <form>
