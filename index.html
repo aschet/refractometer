@@ -151,15 +151,15 @@ function corTerrillCubic(bxi, bxf, wcf) {
 }
 
 // Nutrient content calculation implemented according to:
-// Michael L. Hall. Brew by the Numbers.
-// In: Zymurgy Summer 1995, S. 54-61.
+// MEBAK. Wort, Beer and Beer-based Beverages. Freising-Weihenstephan: Fritz Jacob, 2013,
+// S. 161. ISBN: 978-3-9805814-7-9.
 
-function calcKcalPer100ML(og, fg) {
-    return (3621.0 * fg * ((0.8114 * fg + 0.1886 * og - 1.0) + 0.53 * (og - fg) / (1.775 - og))) / 354.8812 * 100.0;
+function calcKJPer100ML(fg, re, abw) {
+    return fg * (14 * re + 29 * abw);
 }
 
-function kcalToKJ(kcal) {
-    return kcal * 4.1858;
+function calcKcalPer100ML(fg, re, abw) {
+    return fg * (3.5 * re + 7 * abw);
 }
 
 calibrationData = [
@@ -235,8 +235,8 @@ class RefracModel {
         result.abv = calcABV(result.abw, fg);
         result.adf = calcADF(oe, ae);
         result.rdf = calcRDF(oe, result.re);
-        result.kcal = calcKcalPer100ML(pToSG(oe), fg);
-        result.kj = kcalToKJ(result.kcal);
+        result.kcal = calcKcalPer100ML(fg, result.re, result.abw);
+        result.kj = calcKJPer100ML(fg, result.re, result.abw);
         return result;
     }
 }
