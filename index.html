@@ -150,6 +150,21 @@ function corTerrillCubic(bxi, bxf, wcf) {
     return [oe, sgToP(fg), fg];
 }
 
+// Sean Terrill's website issues. 2020.
+// URL: https://www.reddit.com/r/Homebrewing/comments/bs3af9/sean_terrills_website_issues
+
+function corNovotrill(bxi, bxf, wcf) {
+    const [oe1, ae1, fg1] = corTerrillLinear(bxi, bxf, wcf);
+    const [oe2, ae2, fg2] = corNovotnyLinear(bxi, bxf, wcf);
+    fg_mean = (fg1 + fg2) / 2.0;
+    fg = fg1;
+    if (fg_mean < 1.014)
+        fg = fg1;
+    else
+        fg = fg2;
+    return [oe1, sgToP(fg), fg];
+}
+
 // Nutrient content calculation implemented according to:
 // MEBAK. Wort, Beer and Beer-based Beverages. Freising-Weihenstephan: Fritz Jacob, 2013,
 // S. 161. ISBN: 978-3-9805814-7-9.
@@ -245,7 +260,8 @@ refracModels = [
     new RefracModel(corTerrillLinear),
     new RefracModel(corTerrillCubic),
     new RefracModel(corNovotnyLinear),
-    new RefracModel(corNovotnyQuadratic),    
+    new RefracModel(corNovotnyQuadratic),
+    new RefracModel(corNovotrill),
     new RefracModel(corBonham),
     new RefracModel(corGardner /*, abwGardner*/),
     new RefracModel(corGossett, abwGosett)       
@@ -506,10 +522,11 @@ $(document).on('pageinit', '#pdetails', function(event) {
                 <option value="0">Terrill Linear</option>
                 <option value="1">Terrill Kubisch</option>
                 <option value="2">Novotný Linear</option>
-                <option value="3">Novotný Quadratisch</option>                
-                <option value="4">Bonham (Stan­dard)</option>
-                <option value="5">Gardner</option>
-                <option value="6">Gossett</option>
+                <option value="3">Novotný Quadratisch</option>
+                <option value="4">Terrill+Novotný</option>
+                <option value="5">Bonham (Stan­dard)</option>
+                <option value="6">Gardner</option>
+                <option value="7">Gossett</option>
             </select>
             <label for="bxiinput">Refraktometerwert Stammwürze (°Bx):</label>
             <input type="number" name="bxiinput" id="bxiinput" value="" step="0.1" />
