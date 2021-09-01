@@ -331,7 +331,7 @@ function textify(value, unit, digits = 2) {
 }
 
 function concat(text1, text2) {
-    return text1 + " / " + text2;
+    return text1 + "; " + text2;
 }
 
 function textify2(value1, unit1, value2, unit2) {
