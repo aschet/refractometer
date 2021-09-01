@@ -323,12 +323,15 @@ function textify(value, unit, digits = 2) {
     if (isNaN(value)) {
         return "-";
     } else {
-        return value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits }) + " " + unit;
+        text = value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+        if (unit.length > 0)
+            text = text  + " " + unit;
+        return text;
     }
 }
 
 function concat(text1, text2) {
-    return text1 + "; " + text2;
+    return text1 + " / " + text2;
 }
 
 function textify2(value1, unit1, value2, unit2) {
@@ -338,7 +341,7 @@ function textify2(value1, unit1, value2, unit2) {
 function textifyExtract(value, unit, valueSG = NaN) {
     if (isNaN(valueSG))
         valueSG = pToSG(value);
-    return concat(textify(value, unit), textify(valueSG, "g/ml", 3));
+    return concat(textify(value, unit), textify(valueSG, "", 3));
 }
 
 function updateTable(result) {
