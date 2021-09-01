@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Refractometer-Calculator</title>
+    <link rel="icon" type="image/png" href="icon.png"/>    
+    <meta name="description" content="refractometer calculation and measurement correction for homebrewers">
+    <meta name="keywords" content="refractometer, correction, beer, brewing, homebrewing">
+    <meta name="author" content="Thomas Ascher">   
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css">
+    <script src="jquery-2.2.4.min.js"></script>
+    <script src="jquery.mobile-1.4.5.min.js"></script>
+    <script src="PolynomialRegression.js"></script>
+    <script src="main.js"></script>
+</head>
+<body>
+<div data-role="page" id="pcalculation">
+    <div data-role="header">
+        <h1>Refractometer-Calculator</h1>
+        <a href="#pcalibration" data-role="button" data-icon="gear" class="ui-btn-right">Calibration</a>
+    </div>
+    <div role="main" class="ui-content">
+        <form>
+            <label for="formselect">Correlation:</label>
+            <select name="formselect" id="formselect">
+                <option value="0">Terrill Linear</option>
+                <option value="1">Terrill Cubic</option>
+                <option value="2">Novotný Linear</option>
+                <option value="3">Novotný Quadratic</option>
+                <option value="4">Terrill+Novotný</option>
+                <option value="5">Bonham (Stan­dard)</option>
+                <option value="6">Gardner</option>
+                <option value="7">Gossett</option>
+            </select>
+            <label for="bxiinput">Refraktometerwert Anstellwürze (°Bx):</label>
+            <input type="number" name="bxiinput" id="bxiinput" value="" step="0.1" />
+            <label for="bxfinput">Refraktometerwert Jungbier (°Bx):</label>
+            <input type="number" name="bxfinput" id="bxfinput" value="" step="0.1" />
+            <label for="wcfinput">Wort Correction Factor:</label>
+            <input type="number" name="wcfinput" id="wcfinput" value="1.04" step="0.01" />
+        </form>
+        <button name="btncalc" id="btncalc">Calculate</button>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Alcohol Content:</td>
+                    <td id="abvoutput"></td>
+                </tr>
+                <tr>
+                    <td>Original Extract:</td>
+                    <td id="oeoutput"></td>
+                </tr>
+                <tr>
+                    <td>Apparent Extract:</td>
+                    <td id="aeoutput"></td>
+                </tr>
+                <tr>
+                    <td>Apparent Degree of Fermentation:</td>
+                    <td id="adfoutput"></td>
+                </tr>
+                <tr>
+                    <td>Real Extract:</td>
+                    <td id="reoutput"></td>
+                </tr>
+                <tr>
+                    <td>Real Degree of Fermentation:</td>
+                    <td id="rdfoutput"></td>
+                </tr>
+                <tr>
+                    <td>Nutritive Value per 100 ml:</td>
+                    <td id="caloutput"></td>
+                </tr>
+                <tr>
+                    <td>Calibration:</td>
+                    <td id="caliboutput"></td>
+                </tr>                                                                               
+            </tbody>
+        </table>
+    </div>
+</div>
+<div data-role="page" id="pcalibration">
+    <div data-role="header">
+        <a href="#pcalculation" data-role="button" data-icon="back">Back</a>        
+        <h1>Calibration</h1>
+        <a href="#pdetails" data-role="button" data-icon="plus" name="btnadd" id="btnadd">Add</a>
+    </div>
+    <div role="main" class="ui-content">
+        <ul data-role="listview" id="lvcalibration">
+        </ul>
+    </div>
+</div>
+<div data-role="page" id="pdetails">
+    <div data-role="header">
+        <a href="#pcalibration" data-role="button" data-icon="back">Back</a>        
+        <h1>Messpunkt</h1>
+    </div>
+    <div role="main" class="ui-content">
+        <form>
+            <label for="targetinput">Sollwert (°Bx):</label>
+            <input type="number" name="targetinput" id="targetinput" value="" step="0.1" />
+            <label for="actualinput">Istwert (°Bx):</label>
+            <input type="number" name="actualinput" id="actualinput" value="" step="0.1" />
+        </form>
+    </div>
+    <div data-role="footer">
+        <a href="#pcalibration" data-role="button" data-icon="delete" name="btndelete" id="btndelete" class="ui-btn-left">Delete</a>
+        <a href="#pcalibration" data-role="button" data-icon="check" name="btnsave" id="btnsave" class="ui-btn-right">Save</a>
+    </div>	
+</div>
+</body>
+</html>
