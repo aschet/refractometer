@@ -173,6 +173,10 @@ function createTuple(target, actual) {
     return { x: actual, y: target };
 }
 
+textPoint = "Punkt";
+textNominalValue = "Sollwert";
+textActualValue = "Istwert";
+
 class Calibration {
     constructor(data) {
         let dataWithZero = [...data];
@@ -191,11 +195,11 @@ class Calibration {
 
     getType() {
         if (this.model == null) {
-            return "1-Punkt"
+            return "1-" + textPoint;
         } else if (this.model.degree == 1) {
-            return "2-Punkt";
+            return "2-" + textPoint;
         } else {
-            return "N-Punkt";
+            return "N-" + textPoint;
         }
     }
 
@@ -415,7 +419,7 @@ function initList() {
     $('#lvcalibration').empty();
     refreshListView('#lvcalibration');
     addItemsToList('#lvcalibration', calibrationData, function(i, entity) {
-    	text = concat('Sollwert: ' + textify(entity.y, '°Bx'), 'Istwert: ' + textify(entity.x, '°Bx'));
+    	text = concat(textNominalValue + ': ' + textify(entity.y, '°Bx'), textActualValue + ': ' + textify(entity.x, '°Bx'));
         return '<li id="' + i + '"><a href="#pdetails">' + text + '</a></li>';
     });
 }
