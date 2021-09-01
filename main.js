@@ -477,6 +477,36 @@ $(document).on('pageinit', '#pcalibration', function(event) {
         $('#actualinput').val('');
         showButton('#btndelete', false);
 	});
+    $('#btnimport').click(function() {
+        input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = e => { 
+            file = e.target.files[0]; 
+            var reader = new FileReader();
+            reader.readAsText(file,'UTF-8');
+            reader.onload = readerEvent => {
+               var content = readerEvent.target.result;
+                try {
+                    importedCalibrationData = JSON.parse(content);
+                    calibrationData = importedCalibrationData;
+                    updateAfterCalibrationDataChange();
+                } catch (err) {
+                }
+               
+            } 
+         }        
+        input.click();
+	});
+    $('#btnexport').click(function() {
+        blob = new Blob([JSON.stringify(calibrationData)], {type: 'application/json'});
+        downloadLink = document.createElement('a');
+        downloadLink.download = "calibration.json"
+        downloadLink.href = window.URL.createObjectURL(blob);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+	});    
 });
 
 function updateAfterCalibrationDataChange() {
