@@ -400,22 +400,24 @@ function restoreCalibration() {
 }
 
 function updateResult() {
+    if (!pageCalculationInitialized)
+        return;
+    
     var input = getInput();
     var result = calc(input);
     updateTable(result);
 }
 
 function initList() {
-    clearListView('#lvcalibration');
+    if (!pageCalibrationInitialized)
+        return;
+
+    $('#lvcalibration').empty();
+    refreshListView('#lvcalibration');
     addItemsToList('#lvcalibration', calibrationData, function(i, entity) {
     	text = concat('Sollwert: ' + textify(entity.y, '°Bx'), 'Istwert: ' + textify(entity.x, '°Bx'));
         return '<li id="' + i + '"><a href="#pdetails">' + text + '</a></li>';
     });
-}
-
-function clearListView(listviewId) {
-    $(listviewId).empty();
-    refreshListView(listviewId);
 }
 
 function refreshListView(listviewId) {
@@ -438,17 +440,21 @@ function showButton(buttonId, shouldShow) {
         button.hide();
 }
 
+pageCalculationInitialized = false;
+pageCalibrationInitialized = false;
+
 $(document).on('pageinit', '#pcalculation', function(event) {
+    pageCalculationInitialized = true;
     $('#btncalc').click(function() {
         updateResult();
         storeInput();
     });
     updateTable(new Result());
-    restoreCalibration();
     restoreInput();
 });
 
 $(document).on('pageinit', '#pcalibration', function(event) {
+    pageCalibrationInitialized = true;
     initList();
     $('#lvcalibration').delegate('li', 'click', function() {
 		selectedMeasurement = $(this).attr('id');
@@ -474,6 +480,7 @@ function updateAfterCalibrationDataChange() {
 }
 
 $(document).on('pageinit', '#pdetails', function(event) {
+    showButton('#btndelete', selectedMeasurement > 0);
     $('#btnsave').click(function() {
         if (isValidInput($('#targetinput').val()) && isValidInput($('#actualinput').val())) {
             target = parseFloat($('#targetinput').val())
@@ -491,3 +498,5 @@ $(document).on('pageinit', '#pdetails', function(event) {
         updateAfterCalibrationDataChange();
     });
 });
+
+restoreCalibration();
