@@ -323,7 +323,7 @@ function textify(value, unit, digits = 2) {
     if (isNaN(value)) {
         return "-";
     } else {
-        return parseFloat(value.toFixed(digits)).toLocaleString() + " " + unit;
+        return value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits }) + " " + unit;
     }
 }
 
