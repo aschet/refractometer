@@ -63,11 +63,6 @@ function corGardner(bxi, bxf, wcf) {
     return [oe, ae, pToSG(ae)];
 }
 
-function abwGardner(bxi, bxf, wcf) {
-    const [oe, ae, fg] = corGardner(bxi, bxf, wcf);
-    return 1.09 * bxf - 1.13 * ae;
-}
-
 // Gossett correlation function implemented according to:
 // James M. Gossett. Derivation and Explanation of the Brix-Based Calculator For Estimating
 // ABV in Fermenting and Finished Beers. 2012.
@@ -250,8 +245,8 @@ refracModels = [
     new RefracModel(corNovotnyQuadratic),
     new RefracModel(corNovotrill),
     new RefracModel(corBonham),
-    new RefracModel(corGardner /*, abwGardner*/),
-    new RefracModel(corGossett, abwGosett)       
+    new RefracModel(corGardner),
+    new RefracModel(corGossett, abwGosett)
 ];
 
 class Result {
@@ -340,12 +335,18 @@ function textify2(value1, unit1, value2, unit2) {
     return concat(textify(value1, unit1), textify(value2, unit2));
 }
 
+function textifyExtract(value, unit, valueSG = NaN) {
+    if (isNaN(valueSG))
+        valueSG = pToSG(value);
+    return concat(textify(value, unit), textify(valueSG, "g/ml", 3));
+}
+
 function updateTable(result) {
     $('#abvoutput').html(textify2(result.abv, "vol %", result.abw, "%"));            
-    $('#oeoutput').html(textify(result.oe, "°P"));
-    $('#aeoutput').html(textify(result.ae, "g/100g"));
+    $('#oeoutput').html(textifyExtract(result.oe, "°P"));
+    $('#aeoutput').html(textifyExtract(result.ae, "g/100g", result.fg));
     $('#adfoutput').html(textify(result.adf, "%"));            
-    $('#reoutput').html(textify(result.re, "g/100g"));
+    $('#reoutput').html(textifyExtract(result.re, "g/100g"));
     $('#rdfoutput').html(textify(result.rdf, "%"));
     $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
     $('#caliboutput').html(calibration.getType());
