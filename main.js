@@ -74,16 +74,12 @@ function abwGosett(bxi, bxf, wcf) {
     return 48.4 * c / (100 - 0.582 * c);
 }
 
-function corFromABW(abw, bxi, wcf) {
-    oe = correctBx(bxi, wcf);
-    ae = oe - (abw * (2.0665 - 1.0665 * oe / 100.0)) / 0.8052;
-    return [oe, ae, pToSG(ae)];
-}
-
 // The Gossett correlation is for abw and not fg. For abv calculation Gossett utilizes the
 // Bonham correlation. Here the fg is derived from the abw equation instead.
 function corGossett(bxi, bxf, wcf) {
-    return corFromABW(abwGosett(bxi, bxf, wcf), bxi, wcf);
+    abw = abwGosett(bxi, bxf, wcf);
+    ae = bxi - (abw * (2.0665 - 1.0665 * bxi / 100.0)) / 0.8052;
+    return [bxi, ae, pToSG(ae)];
 }
 
 // Novotný correlation functions implemented according to:
