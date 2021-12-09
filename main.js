@@ -337,15 +337,15 @@ function textify2(value1, unit1, value2, unit2) {
 function textifyExtract(value, unit, valueSG = NaN) {
     if (isNaN(valueSG))
         valueSG = pToSG(value);
-    return concat(textify(value, unit), textify(valueSG, "", 3));
+    return concat(textify(value, unit), textify(valueSG, "SG", 3));
 }
 
 function updateTable(result) {
-    $('#abvoutput').html(textify2(result.abv, "vol %", result.abw, "%"));            
+    $('#abvoutput').html(textify2(result.abv, "%v/v", result.abw, "%w/w"));            
     $('#oeoutput').html(textifyExtract(result.oe, "°P"));
-    $('#aeoutput').html(textifyExtract(result.ae, "g/100g", result.fg));
+    $('#aeoutput').html(textifyExtract(result.ae, "%w/w", result.fg));
     $('#adfoutput').html(textify(result.adf, "%"));            
-    $('#reoutput').html(textifyExtract(result.re, "g/100g"));
+    $('#reoutput').html(textifyExtract(result.re, "%w/w"));
     $('#rdfoutput').html(textify(result.rdf, "%"));
     $('#caloutput').html(textify2(result.kj, "kJ", result.kcal, "kcal"));
     $('#caliboutput').html(calibration.getType());
