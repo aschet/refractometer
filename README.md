@@ -13,7 +13,7 @@ This calculator does implement the following correlation models:
 - Gardner
 - Gossett: This model correlates ABW instead of residual extract. Therefore, the residual extract is derived from the ABW.
 - Novotný Linear: Used in newer brewing software as successor to the Terrill Linear model.
-- Novotný Quadrativ
+- Novotný Quadratic
 - Terrill Linear: Probably the most widely used model. Provides less accurate results during fermentation.
 - Terrill Quadratic
 - Terrill & Novotný: Does select either the Novotný Linear or the Terrill Linear after an initial estimation for a more accurate correlation. See https://www.reddit.com/r/Homebrewing/comments/bs3af9/sean_terrills_website_issues for more information.
