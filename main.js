@@ -7,7 +7,7 @@ function correctBx(bx, wcf) {
 
 // Alcohol content estimation and Plato/SG conversion implemented according to:
 // G. Spedding. "Alcohol and Its Measurement". In: Brewing Materials and Processes. Elsevier,
-// 2016, S. 123-149. DOI: 10.1016/b978-0-12-799954-8.00007-1.
+// 2016, p. 123-149. DOI: 10.1016/b978-0-12-799954-8.00007-1.
 
 function sgToP(sg) {
     return sg**2 * -205.347 + 668.72 * sg - 463.37;
@@ -43,7 +43,7 @@ function calcRDF(oe, re) {
 
 // Bonham (Standard) correlation function implemented according to:
 // Louis K. Bonham. "The Use of Handheld Refractometers by Homebrewers".
-// In: Zymurgy 24.1 (2001), S. 43-46.
+// In: Zymurgy 24.1 (2001), p. 43-46.
 
 function corBonham(bxi, bxf, wcf) {
     oe = correctBx(bxi, wcf);
@@ -55,7 +55,7 @@ function corBonham(bxi, bxf, wcf) {
 
 // Gardner correlation function implemented according to:
 // Louis K. Bonham. "The Use of Handheld Refractometers by Homebrewers".
-// In: Zymurgy 24.1 (2001), S. 43-46.
+// In: Zymurgy 24.1 (2001), p. 43-46.
 
 function corGardner(bxi, bxf, wcf) {
     oe = correctBx(bxi, wcf);
@@ -140,7 +140,7 @@ function corNovotrill(bxi, bxf, wcf) {
 
 // Nutrient content calculation implemented according to:
 // MEBAK. Wort, Beer and Beer-based Beverages. Freising-Weihenstephan: Fritz Jacob, 2013,
-// S. 161. ISBN: 978-3-9805814-7-9.
+// p. 161. ISBN: 978-3-9805814-7-9.
 
 function calcKJPer100ML(fg, re, abw) {
     return fg * (14 * re + 29 * abw);
@@ -336,7 +336,10 @@ function textify2(value1, unit1, value2, unit2) {
 function textifyExtract(value, unit, valueSG = NaN) {
     if (isNaN(valueSG))
         valueSG = pToSG(value);
-    return concat(textify(value, unit), textify(valueSG, "SG", 3));
+    text = textify(value, unit);
+    if (!isNaN(valueSG))
+        text += " (" + textify(valueSG, "g/cm³", 3) + ")";
+    return text;
 }
 
 function updateTable(result) {
